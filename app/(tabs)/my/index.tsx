@@ -14,6 +14,7 @@ const items = [
   {
     title: "减肥&减脂",
     icon: "🔥",
+    route: "/weight-loss",
   },
   {
     title: "力量举水平评估",
