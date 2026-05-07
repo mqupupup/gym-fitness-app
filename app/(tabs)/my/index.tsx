@@ -1,13 +1,13 @@
 import { Link } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
-    SafeAreaView,
-    useSafeAreaInsets,
+  SafeAreaView,
+  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 const items = [
   {
-    title: "健美式力量评估",
+    title: "力量水平评估",
     icon: "💪",
     route: "/strength-evaluation",
   },
