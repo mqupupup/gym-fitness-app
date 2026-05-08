@@ -1,4 +1,3 @@
-// My.tsx - 100% 确保内容可见的最终版
 import { Link } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
@@ -20,6 +19,7 @@ const items = [
   {
     title: "力量举水平评估",
     icon: "🏋️",
+    route: "/powerlifting-evaluation",
   },
   {
     title: "力量举计划",

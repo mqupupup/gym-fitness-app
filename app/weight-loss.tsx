@@ -14,9 +14,9 @@ import {
 } from "react-native";
 
 // 引入工具函数和组件
-import CustomModal from "./components/CustomModal";
-import StrategiesList from "./components/StrategiesList";
-import { validateUserData } from "./utils/validation";
+import CustomModal from "../src/components/CustomModal";
+import StrategiesList from "../src/components/StrategiesList";
+import { validateUserData } from "../src/utils/validation";
 
 // 常量数据
 const ACTIVITY_LEVELS = [

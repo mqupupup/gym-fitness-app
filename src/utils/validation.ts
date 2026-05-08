@@ -1,5 +1,3 @@
-// utils/validation.ts
-
 /**
  * 校验用户输入的身体数据是否在合理范围内
  */
@@ -53,4 +51,35 @@ export const validateUserData = (
 
   // 全部通过
   return { isValid: true, message: "" };
+};
+
+export const parseNumericInput = (val: string): number => {
+  const cleaned = val.replace(/[^0-9.]/g, "");
+  return cleaned ? Number(cleaned) : 0;
+};
+
+export const validateInputs = (
+  weight: string,
+  squat: string,
+  bench: string,
+  deadlift: string,
+): { isValid: boolean; error: string | null } => {
+  const bodyWeightNum = parseNumericInput(weight);
+  const squatNum = parseNumericInput(squat);
+  const benchNum = parseNumericInput(bench);
+  const deadliftNum = parseNumericInput(deadlift);
+
+  if (!bodyWeightNum || bodyWeightNum <= 0) {
+    return { isValid: false, error: "请输入有效的体重（必须大于0）" };
+  }
+
+  if (!squatNum || !benchNum || !deadliftNum) {
+    return { isValid: false, error: "请完整输入三大项重量" };
+  }
+
+  if (squatNum <= 0 || benchNum <= 0 || deadliftNum <= 0) {
+    return { isValid: false, error: "三大项重量必须大于0" };
+  }
+
+  return { isValid: true, error: null };
 };
