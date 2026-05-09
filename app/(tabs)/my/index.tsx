@@ -24,6 +24,7 @@ const items = [
   {
     title: "力量举计划",
     icon: "📋",
+    route: "/powerlifting-plans",
   },
 ];
 
