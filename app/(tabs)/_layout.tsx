@@ -1,4 +1,3 @@
-// app/(tabs)/_layout.tsx
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
@@ -7,28 +6,52 @@ export default function Layout() {
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: "#FF6B00",
-        tabBarIcon: ({ color, size }) => {
-          let icon;
+        tabBarActiveTintColor: "#007AFF",
+        tabBarInactiveTintColor: "#666",
+        tabBarStyle: {
+          backgroundColor: "#fff",
+          borderTopWidth: 0,
+          elevation: 5,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 6,
+        },
+        tabBarIcon: ({ color, size, focused }) => {
+          let iconName;
+          const iconSize = focused ? size + 2 : size;
 
           switch (route.name) {
             case "training":
-              icon = "barbell-outline";
+              iconName = focused ? "barbell" : "barbell-outline";
               break;
             case "exercises":
-              icon = "fitness";
+              iconName = focused ? "fitness" : "fitness-outline";
               break;
             case "history":
-              icon = "time";
+              iconName = focused ? "time" : "time-outline";
               break;
             case "my":
-              icon = "person";
+              iconName = focused ? "person" : "person-outline";
               break;
             default:
-              icon = "ellipse";
+              iconName = focused ? "ellipse" : "ellipse-outline";
           }
 
-          return <Ionicons name={icon} size={size} color={color} />;
+          return (
+            <Ionicons
+              name={iconName}
+              size={iconSize}
+              color={color}
+              style={{
+                transform: [{ scale: focused ? 1.15 : 1 }], // 轻微放大效果
+                transition: "all 0.2s ease", // 平滑过渡
+              }}
+            />
+          );
         },
       })}
     >
