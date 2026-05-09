@@ -16,7 +16,7 @@ import {
 } from "react-native-safe-area-context";
 
 // 导入样式
-import { styles } from "./strength-evaluation.styles";
+import { styles } from "../src/styles/strength-evaluation.styles";
 
 // 类型定义
 interface Assessment {
