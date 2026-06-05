@@ -43,7 +43,7 @@ const powerliftingPlans = [
     duration: "持续进阶",
   },
   {
-    id: "madcow-5x5",
+    id: "madcow",
     title: "疯牛55 (Madcow 5x5)",
     description:
       "基于5x5理念的中级训练计划，在StrongLifts社区和中级训练者中较常见。专注于深蹲、卧推、硬拉和推举的基础训练。",
