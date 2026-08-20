@@ -74,6 +74,51 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
 
   const reps = analysis.reps_list || [];
   const angleCurves = analysis.angle_curves || {};
+
+  // P1: 3点移动平均平滑（仅用于UI展示，不修改原始算法数据）
+  const smoothArray = (arr: number[], window = 3): number[] => {
+    if (arr.length < window) return arr;
+    const half = Math.floor(window / 2);
+    return arr.map((_, i) => {
+      let sum = 0;
+      let count = 0;
+      for (
+        let j = Math.max(0, i - half);
+        j <= Math.min(arr.length - 1, i + half);
+        j++
+      ) {
+        sum += arr[j];
+        count++;
+      }
+      return sum / count;
+    });
+  };
+
+  // P1: 关节优先级排序：肘 → 肩 → 肘外展 → 躯干 → 膝 → 髋 → 其他
+  const JOINT_PRIORITY = [
+    /elbow/i,
+    /shoulder/i,
+    /upper_arm/i,
+    /torso/i,
+    /knee/i,
+    /hip/i,
+  ];
+  const sortedAngleEntries = Object.entries(angleCurves)
+    .filter(([, values]) => {
+      if (!Array.isArray(values)) return false;
+      const validCount = values.filter(
+        (v: any) => typeof v === "number" && Number.isFinite(v),
+      ).length;
+      return validCount >= 20; // 少于20个有效点的曲线不展示（如侧面拍摄被遮挡的对侧关节）
+    })
+    .sort(([a], [b]) => {
+      const aIdx = JOINT_PRIORITY.findIndex((re) => re.test(a));
+      const bIdx = JOINT_PRIORITY.findIndex((re) => re.test(b));
+      if (aIdx === -1 && bIdx === -1) return a.localeCompare(b);
+      if (aIdx === -1) return 1;
+      if (bIdx === -1) return -1;
+      return aIdx - bIdx;
+    });
   // 前端筛选骨骼帧：按骨骼完整度排序，只展示最完整的6帧，再按时间顺序排列
   const rawSkeletonFrames = analysis.skeleton_frames || [];
   const skeletonFrames = [...rawSkeletonFrames]
@@ -278,16 +323,18 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                   横轴: 动作周期 0%→100% | 纵轴: 角度(°)
                 </Text>
 
-                {Object.entries(angleCurves).map(([key, values]) => {
-                  const safeValues = (
+                {sortedAngleEntries.map(([key, values]) => {
+                  const rawValues = (
                     Array.isArray(values) ? values : []
                   ).filter(
                     (v: any) => typeof v === "number" && Number.isFinite(v),
                   );
-                  if (safeValues.length === 0) return null;
+                  if (rawValues.length === 0) return null;
 
-                  const minVal = Math.min(...safeValues);
-                  const maxVal = Math.max(...safeValues);
+                  // 仅UI展示用3点平滑，原始数据 rawValues 不动
+                  const safeValues = smoothArray(rawValues, 3);
+                  const minVal = Math.min(...rawValues);
+                  const maxVal = Math.max(...rawValues);
                   const range = maxVal - minVal || 1;
                   const chartH = 80;
                   const chartW = SCREEN_WIDTH - 80;
@@ -331,22 +378,24 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                           const x =
                             (vi / Math.max(safeValues.length - 1, 1)) * chartW;
                           const y = chartH - ((val - minVal) / range) * chartH;
+                          const isMin = vi === rawValues.indexOf(minVal);
+                          const isMax = vi === rawValues.indexOf(maxVal);
                           return (
                             <View
                               key={`pt-${vi}`}
-                              style={[
-                                styles.curvePoint,
-                                {
-                                  left: x - 1.5,
-                                  bottom: y - 1.5,
-                                  backgroundColor:
-                                    vi === safeValues.indexOf(minVal)
-                                      ? "#F44336"
-                                      : vi === safeValues.indexOf(maxVal)
-                                        ? "#4CAF50"
-                                        : "#6a4c93",
-                                },
-                              ]}
+                              style={{
+                                position: "absolute",
+                                left: x - (isMin || isMax ? 2.5 : 1),
+                                bottom: y - (isMin || isMax ? 2.5 : 1),
+                                width: isMin || isMax ? 5 : 2,
+                                height: isMin || isMax ? 5 : 2,
+                                borderRadius: isMin || isMax ? 2.5 : 1,
+                                backgroundColor: isMin
+                                  ? "#F44336"
+                                  : isMax
+                                    ? "#4CAF50"
+                                    : "#6a4c93",
+                              }}
                             />
                           );
                         })}
