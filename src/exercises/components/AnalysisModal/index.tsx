@@ -183,6 +183,8 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
   const fatigue = analysis.fatigue || null;
   const fatigueLevel = safeStr(fatigue?.fatigue_level, "unknown");
   const fatigueVelocityLoss = safeFixed(fatigue?.velocity_loss_pct);
+  const fatigueStatus = safeStr(fatigue?.status, "");
+  const fatigueInsufficient = fatigueStatus === "insufficient_data";
   const fatigueRir =
     fatigue?.estimated_rir != null && fatigue.estimated_rir >= 0
       ? String(fatigue.estimated_rir)
@@ -835,36 +837,43 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
               <View style={styles.analysisSection}>
                 <Text style={styles.sectionTitle}>💪 疲劳分析</Text>
                 <View style={styles.fatigueCard}>
-                  <View style={styles.fatigueRow}>
-                    <Text style={styles.fatigueLabel}>速度损失</Text>
-                    <Text
-                      style={[
-                        styles.fatigueValue,
-                        {
-                          color: getFatigueColor(fatigueLevel),
-                        },
-                      ]}
-                    >
-                      {fatigueVelocityLoss}%
-                    </Text>
-                  </View>
-                  <View style={styles.fatigueRow}>
-                    <Text style={styles.fatigueLabel}>预估 RIR</Text>
-                    <Text style={styles.fatigueValue}>{fatigueRir}</Text>
-                  </View>
-                  <View style={styles.fatigueRow}>
-                    <Text style={styles.fatigueLabel}>疲劳等级</Text>
-                    <Text
-                      style={[
-                        styles.fatigueValue,
-                        {
-                          color: getFatigueColor(fatigueLevel),
-                        },
-                      ]}
-                    >
-                      {fatigueLevel}
-                    </Text>
-                  </View>
+                  {fatigueInsufficient ? (
+                    <View style={{ paddingVertical: 12, alignItems: "center" }}>
+                      <Ionicons name="information-circle-outline" size={20} color="#999" />
+                      <Text style={{ color: "#999", fontSize: 13, marginTop: 6, textAlign: "center" }}>
+                        数据不足，疲劳分析需至少 3 次有效动作
+                      </Text>
+                    </View>
+                  ) : (
+                    <>
+                      <View style={styles.fatigueRow}>
+                        <Text style={styles.fatigueLabel}>速度损失</Text>
+                        <Text
+                          style={[
+                            styles.fatigueValue,
+                            { color: getFatigueColor(fatigueLevel) },
+                          ]}
+                        >
+                          {fatigueVelocityLoss}%
+                        </Text>
+                      </View>
+                      <View style={styles.fatigueRow}>
+                        <Text style={styles.fatigueLabel}>预估 RIR</Text>
+                        <Text style={styles.fatigueValue}>{fatigueRir}</Text>
+                      </View>
+                      <View style={styles.fatigueRow}>
+                        <Text style={styles.fatigueLabel}>疲劳等级</Text>
+                        <Text
+                          style={[
+                            styles.fatigueValue,
+                            { color: getFatigueColor(fatigueLevel) },
+                          ]}
+                        >
+                          {fatigueLevel}
+                        </Text>
+                      </View>
+                    </>
+                  )}
                   {fatigueCurve.length > 0 && (
                     <View style={styles.fatigueRow}>
                       <Text style={styles.fatigueLabel}>速度曲线</Text>
@@ -873,10 +882,10 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                         {safeFixed(
                           fatigueCurve.reduce((a, b) => a + b, 0) /
                             fatigueCurve.length,
-                          2,
+                          1,
                         )}{" "}
-                        / 峰{safeFixed(Math.max(...fatigueCurve), 2)} / 谷
-                        {safeFixed(Math.min(...fatigueCurve), 2)} m/s
+                        / 峰{safeFixed(Math.max(...fatigueCurve), 1)} / 谷
+                        {safeFixed(Math.min(...fatigueCurve), 1)} °/s
                       </Text>
                     </View>
                   )}

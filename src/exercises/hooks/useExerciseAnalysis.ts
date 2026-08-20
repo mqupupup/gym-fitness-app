@@ -264,14 +264,15 @@ export const useExerciseAnalysis = () => {
         };
       });
 
-      // 5. 质量细分 breakdown (✅ 去掉了 stability)
+      // 5. 质量细分 breakdown
+      // 后端返回 technique/movement_quality/safety/performance，前端字段名不同，需要映射
       const breakdown = analysisData.quality?.breakdown || {};
       const qualityBreakdown = {
-        bar_path: extractScore(breakdown.bar_path),
+        bar_path: extractScore(breakdown.bar_path || breakdown.movement_quality),
         joint_control: extractScore(
-          breakdown.joint_control || breakdown.elbow_tuck,
+          breakdown.joint_control || breakdown.elbow_tuck || breakdown.technique,
         ),
-        tempo: extractScore(breakdown.tempo),
+        tempo: extractScore(breakdown.tempo || breakdown.performance),
         safety: extractScore(breakdown.safety || breakdown.touch_point),
       };
 
@@ -287,12 +288,12 @@ export const useExerciseAnalysis = () => {
         velocityCurve.length > 0
           ? (
               velocityCurve.reduce((a, b) => a + b, 0) / velocityCurve.length
-            ).toFixed(2) + " m/s"
-          : "-- m/s";
+            ).toFixed(1) + " °/s"
+          : "-- °/s";
       const maxSpeed =
         velocityCurve.length > 0
-          ? Math.max(...velocityCurve).toFixed(2) + " m/s"
-          : "-- m/s";
+          ? Math.max(...velocityCurve).toFixed(1) + " °/s"
+          : "-- °/s";
 
       // 7. 安全构建 fatigue 对象
       const rawFatigue = analysisData.fatigue;
@@ -311,6 +312,7 @@ export const useExerciseAnalysis = () => {
               rawFatigue.fatigue_level ?? rawFatigue.level,
               "unknown",
             ),
+            status: safeString(rawFatigue.status, ""),
             velocity_curve: velocityCurve,
           }
         : undefined;
