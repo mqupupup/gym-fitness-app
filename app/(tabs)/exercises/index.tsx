@@ -4,7 +4,7 @@ import { useExerciseAnalysis } from "@/src/exercises/hooks/useExerciseAnalysis";
 import { styles } from "@/src/exercises/styles";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -43,14 +43,15 @@ export default function ExercisesScreen() {
   const insets = useSafeAreaInsets();
   const supportExercisesText = SUPPORTED_EXERCISES.join(" · ");
 
-  // 分析中不确定进度条的滑动动画
+  // 分析中不确定进度条的滑动动画（用原生驱动，避免JS线程阻塞导致卡死）
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const [progressBarWidth, setProgressBarWidth] = useState(0);
   useEffect(() => {
     const loop = Animated.loop(
       Animated.timing(progressAnim, {
         toValue: 1,
         duration: 2000,
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
     );
     loop.start();
@@ -290,7 +291,13 @@ export default function ExercisesScreen() {
             <Text style={styles.lockModalTitle}>
               {uploadProgress < 100 ? "上传视频" : "AI 分析中"}
             </Text>
-            <View style={styles.lockProgressBarBg}>
+            <View
+              style={styles.lockProgressBarBg}
+              onLayout={(e) => {
+                const w = e.nativeEvent.layout.width;
+                setProgressBarWidth((prev) => (prev === w ? prev : w));
+              }}
+            >
               {uploadProgress < 100 ? (
                 <View
                   style={[
@@ -299,17 +306,26 @@ export default function ExercisesScreen() {
                   ]}
                 />
               ) : (
-                <Animated.View
-                  style={[
-                    styles.lockProgressBarIndeterminate,
-                    {
-                      left: progressAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ["-40%", "100%"],
-                      }),
-                    },
-                  ]}
-                />
+                progressBarWidth > 0 && (
+                  <Animated.View
+                    style={[
+                      styles.lockProgressBarIndeterminate,
+                      {
+                        transform: [
+                          {
+                            translateX: progressAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [
+                                -progressBarWidth * 0.4,
+                                progressBarWidth,
+                              ],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
+                  />
+                )
               )}
             </View>
             <Text style={styles.lockModalStatus}>
