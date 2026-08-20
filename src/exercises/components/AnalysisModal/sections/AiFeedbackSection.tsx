@@ -9,7 +9,21 @@ import { styles } from "../../../styles";
 interface AiFeedbackSectionProps {
   analysis: AnalysisResult;
   onViewEvidence?: (errorId: string) => void;
+  onViewAngleCurve?: (jointKey: string) => void;
 }
+
+// P3: 错误类型 → 对应关节曲线的映射
+// 注意：后端 angle_curves 只有 left/right_knee, left/right_elbow, left/right_hip, torso_from_vertical
+const ERROR_JOINT_MAP: Record<string, RegExp> = {
+  bench_incomplete_rom: /elbow/i,
+  bench_incomplete_lockout: /elbow/i,
+  bench_elbow_flare: /elbow/i, // 肘部外展用肘角曲线间接观察
+  bench_bounce: /elbow/i,
+  bench_butt_off_bench: /torso/i,
+  bench_asymmetric_push: /elbow/i,
+  bench_eccentric_speed: /elbow/i,
+  bench_touch_point_drift: /elbow/i,
+};
 
 const safeString = (val: any): string => {
   if (val == null || val === "") return "";
@@ -38,6 +52,7 @@ const safeStringArray = (arr: any): string[] => {
 export const AiFeedbackSection: React.FC<AiFeedbackSectionProps> = ({
   analysis,
   onViewEvidence,
+  onViewAngleCurve,
 }) => {
   const ai = analysis.ai_feedback;
   const summary = safeString(ai?.summary);
@@ -59,6 +74,15 @@ export const AiFeedbackSection: React.FC<AiFeedbackSectionProps> = ({
       if (ev.rule) evidenceErrorIds.add(ev.rule);
     });
   });
+
+  // P3: 检查某错误是否有关节曲线可展示，返回匹配的 jointKey
+  const getJointKeyForError = (errorId: string): string | null => {
+    const pattern = ERROR_JOINT_MAP[errorId];
+    if (!pattern) return null;
+    const angleCurves = analysis.angle_curves || {};
+    const match = Object.keys(angleCurves).find((key) => pattern.test(key));
+    return match || null;
+  };
 
   return (
     <View style={styles.analysisSection}>
@@ -174,39 +198,56 @@ export const AiFeedbackSection: React.FC<AiFeedbackSectionProps> = ({
                         </Text>
                       </View>
                     )}
-                    {onViewEvidence &&
-                      err.error_id &&
-                      evidenceErrorIds.has(err.error_id) && (
-                        <TouchableOpacity
-                          onPress={() => onViewEvidence(err.error_id!)}
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            alignSelf: "flex-start",
-                            marginTop: 6,
-                            paddingVertical: 4,
-                            paddingHorizontal: 10,
-                            backgroundColor: "#6a4c93",
-                            borderRadius: 4,
-                            gap: 4,
-                          }}
-                        >
-                          <Ionicons
-                            name="images-outline"
-                            size={12}
-                            color="#fff"
-                          />
-                          <Text
-                            style={{
-                              color: "#fff",
-                              fontSize: 11,
-                              fontWeight: "600",
-                            }}
-                          >
-                            查看证据
-                          </Text>
-                        </TouchableOpacity>
-                      )}
+                    {(onViewEvidence || onViewAngleCurve) && err.error_id && (
+                      <View style={{ flexDirection: "row", gap: 8, marginTop: 6 }}>
+                        {onViewEvidence &&
+                          evidenceErrorIds.has(err.error_id) && (
+                            <TouchableOpacity
+                              onPress={() => onViewEvidence(err.error_id!)}
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                paddingVertical: 4,
+                                paddingHorizontal: 10,
+                                backgroundColor: "#6a4c93",
+                                borderRadius: 4,
+                                gap: 4,
+                              }}
+                            >
+                              <Ionicons name="images-outline" size={12} color="#fff" />
+                              <Text style={{ color: "#fff", fontSize: 11, fontWeight: "600" }}>
+                                查看证据
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        {onViewAngleCurve &&
+                          (() => {
+                            const jointKey = getJointKeyForError(err.error_id!);
+                            if (!jointKey) return null;
+                            return (
+                              <TouchableOpacity
+                                onPress={() => onViewAngleCurve(jointKey)}
+                                style={{
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  paddingVertical: 4,
+                                  paddingHorizontal: 10,
+                                  backgroundColor: "#fff",
+                                  borderWidth: 1,
+                                  borderColor: "#6a4c93",
+                                  borderRadius: 4,
+                                  gap: 4,
+                                }}
+                              >
+                                <Ionicons name="trending-up-outline" size={12} color="#6a4c93" />
+                                <Text style={{ color: "#6a4c93", fontSize: 11, fontWeight: "600" }}>
+                                  角度变化
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })()}
+                      </View>
+                    )}
                   </View>
                 );
               })}

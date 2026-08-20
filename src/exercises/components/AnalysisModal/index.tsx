@@ -160,6 +160,24 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
     setTimeout(() => setHighlightedError(null), 3000);
   };
 
+  // P3: 关节曲线滚动 + 高亮（用 onLayout 预记录位置，比 measureLayout 更可靠）
+  const curveSectionRef = useRef<View>(null);
+  const [sectionLayoutY, setSectionLayoutY] = useState(0);
+  const [cardLayoutYs, setCardLayoutYs] = useState<Record<string, number>>({});
+  const [highlightedJoint, setHighlightedJoint] = useState<string | null>(null);
+
+  const handleViewAngleCurve = (jointKey: string) => {
+    setHighlightedJoint(jointKey);
+    requestAnimationFrame(() => {
+      const cardY = cardLayoutYs[jointKey];
+      const targetY = cardY != null
+        ? sectionLayoutY + cardY - 20
+        : sectionLayoutY - 20;
+      scrollViewRef.current?.scrollTo({ y: targetY, animated: true });
+    });
+    setTimeout(() => setHighlightedJoint(null), 3000);
+  };
+
   const currentRep = reps[selectedRepIndex] || null;
 
   const fatigue = analysis.fatigue || null;
@@ -314,10 +332,16 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
             <AiFeedbackSection
               analysis={analysis}
               onViewEvidence={handleViewEvidence}
+              onViewAngleCurve={handleViewAngleCurve}
             />
             {/* ============ Section 4: 关节角度曲线 ============ */}
-            {Object.keys(angleCurves).length > 0 && (
-              <View style={styles.analysisSection}>
+            {sortedAngleEntries.length > 0 && (
+              <View
+                ref={curveSectionRef}
+                style={styles.analysisSection}
+                collapsable={false}
+                onLayout={(e) => setSectionLayoutY(e.nativeEvent.layout.y)}
+              >
                 <Text style={styles.sectionTitle}>📈 关节角度曲线</Text>
                 <Text style={styles.curveSubtitle}>
                   横轴: 动作周期 0%→100% | 纵轴: 角度(°)
@@ -340,7 +364,23 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                   const chartW = SCREEN_WIDTH - 80;
 
                   return (
-                    <View key={`curve-${key}`} style={styles.curveCard}>
+                    <View
+                      key={`curve-${key}`}
+                      onLayout={(e) => {
+                        const y = e.nativeEvent.layout.y;
+                        setCardLayoutYs((prev) =>
+                          prev[key] === y ? prev : { ...prev, [key]: y },
+                        );
+                      }}
+                      style={[
+                        styles.curveCard,
+                        highlightedJoint === key && {
+                          borderWidth: 2,
+                          borderColor: "#6a4c93",
+                          backgroundColor: "#f3e5f5",
+                        },
+                      ]}
+                    >
                       <View style={styles.curveHeader}>
                         <Text style={styles.curveName}>
                           {ANGLE_NAME_ZH[key] || key}
