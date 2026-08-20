@@ -502,6 +502,11 @@ export const useExerciseAnalysis = () => {
             : r,
         ),
       );
+
+      // 13. 分析完成后自动打开分析详情弹窗（不自动关闭，等用户手动关闭）
+      setCurrentAnalysis(validated);
+      setSelectedRepIndex(0);
+      setShowAnalysisModal(true);
     } catch (error: any) {
       console.error("上传/分析失败:", error);
       Alert.alert("错误", error.message || "上传或分析失败");
