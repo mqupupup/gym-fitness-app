@@ -185,6 +185,8 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
   const fatigueVelocityLoss = safeFixed(fatigue?.velocity_loss_pct);
   const fatigueStatus = safeStr(fatigue?.status, "");
   const fatigueInsufficient = fatigueStatus === "insufficient_data";
+  const fatigueVelocityIncrease = fatigueStatus === "velocity_increase";
+  const fatigueUnavailable = fatigueInsufficient || fatigueVelocityIncrease;
   const fatigueRir =
     fatigue?.estimated_rir != null && fatigue.estimated_rir >= 0
       ? String(fatigue.estimated_rir)
@@ -837,11 +839,13 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
               <View style={styles.analysisSection}>
                 <Text style={styles.sectionTitle}>💪 疲劳分析</Text>
                 <View style={styles.fatigueCard}>
-                  {fatigueInsufficient ? (
+                  {fatigueUnavailable ? (
                     <View style={{ paddingVertical: 12, alignItems: "center" }}>
                       <Ionicons name="information-circle-outline" size={20} color="#999" />
                       <Text style={{ color: "#999", fontSize: 13, marginTop: 6, textAlign: "center" }}>
-                        数据不足，疲劳分析需至少 3 次有效动作
+                        {fatigueInsufficient
+                          ? "数据不足，疲劳分析需至少 3 次有效动作"
+                          : "速度数据不稳定（末段速度上升），无法可靠评估疲劳"}
                       </Text>
                     </View>
                   ) : (
