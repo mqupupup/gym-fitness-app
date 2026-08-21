@@ -1,5 +1,6 @@
 import { Link } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -8,22 +9,26 @@ import {
 const items = [
   {
     title: "力量水平评估",
-    icon: "💪",
+    subtitle: "查看你的力量等级与发展潜力",
+    icon: "barbell-outline",
     route: "/strength-evaluation",
   },
   {
-    title: "减肥&减脂",
-    icon: "🔥",
+    title: "减肥 & 减脂",
+    subtitle: "计算每日热量消耗与减脂目标",
+    icon: "flame-outline",
     route: "/weight-loss",
   },
   {
     title: "力量举水平评估",
-    icon: "🏋️",
+    subtitle: "三大项成绩与等级诊断",
+    icon: "trophy-outline",
     route: "/powerlifting-evaluation",
   },
   {
     title: "力量举计划",
-    icon: "📋",
+    subtitle: "周期性训练计划与进度追踪",
+    icon: "calendar-outline",
     route: "/powerlifting-plans",
   },
 ];
@@ -32,28 +37,35 @@ export default function My() {
   const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top + 20 }]}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top + 16 }]}>
       <Text style={styles.title}>我的</Text>
+      <Text style={styles.subtitle}>训练、力量与成长，都在这里</Text>
 
       <View style={styles.cardList}>
-        {items.map((item, index) => (
+        {items.map((item) => (
           <Link
             key={item.title}
             href={item.route || "#"}
             asChild
-            style={{ marginBottom: 16 }}
           >
             <Pressable
               style={styles.card}
-              android_ripple={{ color: "rgba(0, 122, 255, 0.1)" }}
+              android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
             >
-              <View style={styles.cardContent}>
-                <View style={styles.iconContainer}>
-                  <Text style={styles.icon}>{item.icon}</Text>
-                </View>
-                <Text style={styles.cardTitle}>{item.title}</Text>
+              <View style={styles.iconContainer}>
+                <Ionicons name={item.icon} size={22} color="#6A4C93" />
               </View>
-              <Text style={styles.cardArrow}>›</Text>
+              <View style={styles.cardText}>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={styles.cardSubtitle} numberOfLines={1}>
+                  {item.subtitle}
+                </Text>
+              </View>
+              <Ionicons
+                name="chevron-forward-outline"
+                size={18}
+                color="#C7C7CC"
+              />
             </Pressable>
           </Link>
         ))}
@@ -65,60 +77,62 @@ export default function My() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
-    paddingHorizontal: 16,
+    backgroundColor: "#F7F6FA",
+    paddingHorizontal: 20,
   },
   title: {
     color: "#1C1C1E",
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "700",
-    marginBottom: 20,
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  subtitle: {
+    color: "#8E8E93",
+    fontSize: 14,
+    fontWeight: "400",
+    marginBottom: 28,
   },
   cardList: {
     flex: 1,
   },
   card: {
     width: "100%",
-    minHeight: 60,
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
     elevation: 2,
   },
-  cardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    minWidth: 0, // 允许内容收缩
-  },
   iconContainer: {
-    width: 40, // 固定宽度确保图标可见
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: "#F3F0FF",
     alignItems: "center",
     justifyContent: "center",
+    marginRight: 14,
   },
-  icon: {
-    fontSize: 32,
-    color: "#1C1C1E", // 深色确保可见
+  cardText: {
+    flex: 1,
+    minWidth: 0,
   },
   cardTitle: {
     color: "#1C1C1E",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
-    marginLeft: 14,
-    flexShrink: 1,
-    maxWidth: "70%", // 防止文字溢出
+    marginBottom: 2,
   },
-  cardArrow: {
+  cardSubtitle: {
     color: "#8E8E93",
-    fontSize: 22,
+    fontSize: 13,
+    fontWeight: "400",
   },
 });
