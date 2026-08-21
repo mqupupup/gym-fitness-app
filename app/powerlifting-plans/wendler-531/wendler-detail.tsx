@@ -196,11 +196,7 @@ export default function WendlerDetail() {
         <View style={styles.summaryCard}>
           <View style={styles.cardHeader}>
             <Ionicons name="information-circle-outline" size={18} color="#6A4C93" />
-            <Text style={styles.cardTitle}>计划概要</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>体重</Text>
-            <Text style={styles.summaryValue}>{data.userWeight} kg</Text>
+            <Text style={styles.cardTitle}>四项 1RM 估算</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>深蹲 1RM</Text>
@@ -315,8 +311,7 @@ export default function WendlerDetail() {
 
         {/* 底部提示 */}
         <View style={styles.tipCard}>
-          <Ionicons name="lightbulb-outline" size={16} color="#8E8E93" />
-          <Text style={styles.tipText}>截图保存此计划，或在训练记录页面跟踪进度</Text>
+          <Text style={styles.tipText}>第3周PR周全力突破，第4周减载周轻松恢复</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -681,18 +676,18 @@ const styles = StyleSheet.create({
 
   // 底部提示
   tipCard: {
-    flexDirection: "row",
+    backgroundColor: "#6A4C93",
+    borderRadius: 12,
+    padding: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 14,
-    gap: 8,
   },
   tipText: {
-    fontSize: 13,
-    color: "#8E8E93",
+    fontSize: 14,
+    color: "#FFFFFF",
     textAlign: "center",
+    fontWeight: "600",
+    lineHeight: 20,
   },
 
   // 错误

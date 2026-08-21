@@ -33,8 +33,6 @@ export default function WendlerInput() {
   }, [navigation]);
 
   const [formData, setFormData] = useState({
-    weight: "",
-    barWeight: "20",
     squatWeight: "",
     squatReps: "5",
     benchWeight: "",
@@ -56,13 +54,12 @@ export default function WendlerInput() {
 
   const handleCalculatePlan = () => {
     if (
-      !formData.weight ||
       !formData.squatWeight ||
       !formData.benchWeight ||
       !formData.deadliftWeight ||
       !formData.pressWeight
     ) {
-      Alert.alert("请填写所有必填字段");
+      Alert.alert("请填写所有动作的重量");
       return;
     }
 
@@ -84,8 +81,6 @@ export default function WendlerInput() {
     );
 
     const planData = {
-      userWeight: parseFloat(formData.weight),
-      barWeight: parseFloat(formData.barWeight),
       lifts: {
         squat: {
           weight: parseFloat(formData.squatWeight),
@@ -155,42 +150,10 @@ export default function WendlerInput() {
             </View>
           </View>
 
-          {/* 用户基本信息 */}
-          <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>基本信息</Text>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>体重</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={formData.weight}
-                  onChangeText={(value) => updateField("weight", value)}
-                  keyboardType="numeric"
-                  placeholder="请输入体重"
-                  placeholderTextColor="#C7C7CC"
-                />
-                <Text style={styles.unit}>kg</Text>
-              </View>
-            </View>
-            <View style={styles.inputGroupLast}>
-              <Text style={styles.inputLabel}>杠铃重量</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={formData.barWeight}
-                  onChangeText={(value) => updateField("barWeight", value)}
-                  keyboardType="numeric"
-                  placeholder="默认 20"
-                  placeholderTextColor="#C7C7CC"
-                />
-                <Text style={styles.unit}>kg</Text>
-              </View>
-            </View>
-          </View>
-
           {/* 四项动作输入 */}
           <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>四项动作最大重量</Text>
+            <Text style={styles.sectionTitle}>四项动作训练数据</Text>
+            <Text style={styles.sectionHint}>输入你最近能完成的训练重量和次数，系统自动推算 1RM</Text>
             {LIFT_FIELDS.map((lift, index) => (
               <View
                 key={lift.key}
@@ -373,7 +336,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#1C1C1E",
+    marginBottom: 6,
+  },
+  sectionHint: {
+    fontSize: 12,
+    color: "#8E8E93",
     marginBottom: 14,
+    lineHeight: 17,
   },
 
   // 动作卡片
