@@ -1,6 +1,8 @@
-import { useNavigation } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { Stack } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -11,23 +13,23 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { useTrainingLog } from "../../../src/hooks/useTrainingLog";
 
-export default function TexasLog() {
-  const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
-  const scrollViewRef = useRef<ScrollView>(null);
-  const { saveLog, loading } = useTrainingLog();
+const EXERCISES = ["深蹲", "卧推", "硬拉", "推举"];
 
-  // Texas 特有状态
-  const [trainingDay, setTrainingDay] = useState<
-    "volume" | "recovery" | "intensity"
-  >("volume");
-  const [formData, setFormData] = useState({
+export default function TexasLog() {
+  const navigation = useNavigation();
+  const { logs, loading, saveLog, getRecentLogs, deleteLog } = useTrainingLog();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const insets = useSafeAreaInsets();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: "德州训练记录" });
+  }, [navigation]);
+
+  const [currentLog, setCurrentLog] = useState({
     date: new Date().toISOString().split("T")[0],
     exercise: "",
     weight: "",
@@ -35,315 +37,357 @@ export default function TexasLog() {
     notes: "",
   });
 
-  const exercises = ["深蹲", "卧推", "硬拉", "推举"];
-
-  // 根据训练日设置默认次数
-  const getDefaultReps = () => {
-    if (trainingDay === "volume") return "5"; // 5×5
-    if (trainingDay === "recovery") return "3"; // 5×3
-    if (trainingDay === "intensity") return "5"; // 1×5（冲击重量）
-    return "5";
-  };
-
-  useEffect(() => {
-    // 设置默认次数
-    setFormData((prev) => ({ ...prev, reps: getDefaultReps() }));
-  }, [trainingDay]);
-
-  useEffect(() => {
-    navigation.setOptions({
-      title: "德州训练法",
-      headerTitle: "德州训练法",
-    });
-  }, [navigation]);
-
   const handleSaveLog = async () => {
-    if (!formData.exercise || !formData.weight) {
-      Alert.alert("错误", "请填写动作和重量");
+    if (!currentLog.exercise || !currentLog.weight || !currentLog.reps) {
+      Alert.alert("请填写完整训练记录");
       return;
     }
 
     const success = await saveLog({
-      date: formData.date,
-      exercise: formData.exercise,
-      weight: parseFloat(formData.weight),
-      reps: parseInt(formData.reps) || 5,
-      notes: `Texas Method - ${trainingDay === "volume" ? "容量日" : trainingDay === "recovery" ? "恢复日" : "强度日"}${formData.notes ? ` | ${formData.notes}` : ""}`,
+      date: currentLog.date,
+      exercise: currentLog.exercise,
+      weight: parseFloat(currentLog.weight),
+      reps: parseInt(currentLog.reps),
+      notes: currentLog.notes,
+      plan: "texas",
     });
 
     if (success) {
-      Alert.alert("成功", "训练记录已保存！");
-      setFormData({
+      Alert.alert("训练记录已保存");
+      setCurrentLog({
         date: new Date().toISOString().split("T")[0],
         exercise: "",
         weight: "",
-        reps: getDefaultReps(),
+        reps: "",
         notes: "",
       });
     } else {
-      Alert.alert("错误", "保存失败，请重试");
+      Alert.alert("保存失败，请重试");
     }
   };
 
-  const updateField = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleDeleteLog = async (id: string) => {
+    Alert.alert("确认删除", "确定要删除这条训练记录吗？", [
+      { text: "取消", style: "cancel" },
+      {
+        text: "删除",
+        style: "destructive",
+        onPress: async () => {
+          await deleteLog(id);
+        },
+      },
+    ]);
   };
 
+  const updateLogField = (field: string, value: string) => {
+    setCurrentLog((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const recentLogs = getRecentLogs(20, "texas");
+
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <Stack.Screen options={{ title: "德州训练记录" }} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={insets.top + 60}
+        behavior={Platform.OS === "ios" ? "height" : undefined}
+        keyboardVerticalOffset={insets.top + 44}
+        style={{ flex: 1 }}
       >
         <ScrollView
           ref={scrollViewRef}
+          style={styles.scrollView}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollViewContent}
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.title}>德州训练法</Text>
-          <Text style={styles.subtitle}>记录您的每次训练表现</Text>
-
-          {/* 训练日选择 */}
-          <View style={styles.daySelector}>
-            <Pressable
-              style={[
-                styles.dayButton,
-                trainingDay === "volume" && styles.dayButtonActive,
-              ]}
-              onPress={() => setTrainingDay("volume")}
-            >
-              <Text
-                style={[
-                  styles.dayButtonText,
-                  trainingDay === "volume" && styles.dayButtonTextActive,
-                ]}
-              >
-                容量日
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.dayButton,
-                trainingDay === "recovery" && styles.dayButtonActive,
-              ]}
-              onPress={() => setTrainingDay("recovery")}
-            >
-              <Text
-                style={[
-                  styles.dayButtonText,
-                  trainingDay === "recovery" && styles.dayButtonTextActive,
-                ]}
-              >
-                恢复日
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.dayButton,
-                trainingDay === "intensity" && styles.dayButtonActive,
-              ]}
-              onPress={() => setTrainingDay("intensity")}
-            >
-              <Text
-                style={[
-                  styles.dayButtonText,
-                  trainingDay === "intensity" && styles.dayButtonTextActive,
-                ]}
-              >
-                强度日
-              </Text>
-            </Pressable>
+          {/* 顶部标题区 */}
+          <View style={styles.header}>
+            <View style={styles.headerIcon}>
+              <Ionicons name="barbell-outline" size={24} color="#6A4C93" />
+            </View>
+            <View style={styles.headerText}>
+              <Text style={styles.headerTitle}>德州训练记录</Text>
+              <Text style={styles.headerSubtitle}>记录你的每次训练表现</Text>
+            </View>
           </View>
 
-          <View style={styles.logForm}>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>日期</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.date}
-                onChangeText={(value) => updateField("date", value)}
-                placeholder="YYYY-MM-DD"
-              />
-            </View>
-
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>动作</Text>
-              <View style={styles.exerciseSelector}>
-                {exercises.map((exercise) => (
-                  <Pressable
-                    key={exercise}
-                    style={[
-                      styles.exerciseButton,
-                      formData.exercise === exercise &&
-                        styles.exerciseButtonActive,
-                    ]}
-                    onPress={() => updateField("exercise", exercise)}
-                  >
-                    <Text
-                      style={[
-                        styles.exerciseButtonText,
-                        formData.exercise === exercise &&
-                          styles.exerciseButtonTextActive,
-                      ]}
-                    >
-                      {exercise}
-                    </Text>
-                  </Pressable>
-                ))}
+          {/* 记录表单 */}
+          <View style={styles.formCard}>
+            {/* 日期 */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>日期</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={currentLog.date}
+                  onChangeText={(value) => updateLogField("date", value)}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor="#C7C7CC"
+                />
+                <Ionicons name="calendar-outline" size={18} color="#8E8E93" />
               </View>
             </View>
 
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>重量 (kg)</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.weight}
-                onChangeText={(value) => updateField("weight", value)}
-                keyboardType="numeric"
-                placeholder="例如: 100"
-              />
+            {/* 动作选择 */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>动作</Text>
+              <View style={styles.exerciseSelector}>
+                {EXERCISES.map((exercise) => {
+                  const isActive = currentLog.exercise === exercise;
+                  return (
+                    <Pressable
+                      key={exercise}
+                      style={[
+                        styles.exerciseButton,
+                        isActive && styles.exerciseButtonActive,
+                      ]}
+                      onPress={() => updateLogField("exercise", exercise)}
+                      android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
+                    >
+                      <Text
+                        style={[
+                          styles.exerciseButtonText,
+                          isActive && styles.exerciseButtonTextActive,
+                        ]}
+                      >
+                        {exercise}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
 
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>次数</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.reps}
-                onChangeText={(value) => updateField("reps", value)}
-                keyboardType="numeric"
-                placeholder={getDefaultReps()}
-              />
+            {/* 重量 */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>重量</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={currentLog.weight}
+                  onChangeText={(value) => updateLogField("weight", value)}
+                  keyboardType="numeric"
+                  placeholder="请输入重量"
+                  placeholderTextColor="#C7C7CC"
+                />
+                <Text style={styles.unit}>kg</Text>
+              </View>
             </View>
 
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>备注</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={formData.notes}
-                onChangeText={(value) => updateField("notes", value)}
-                placeholder="RPE、技术要点、感受等"
-                multiline
-                numberOfLines={3}
-              />
+            {/* 次数 */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>次数</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={currentLog.reps}
+                  onChangeText={(value) => updateLogField("reps", value)}
+                  keyboardType="numeric"
+                  placeholder="请输入次数"
+                  placeholderTextColor="#C7C7CC"
+                />
+                <Text style={styles.unit}>次</Text>
+              </View>
             </View>
 
-            <Pressable
-              style={styles.saveButton}
-              onPress={handleSaveLog}
-              disabled={loading}
-            >
-              <Text style={styles.saveButtonText}>
-                {loading
-                  ? "保存中..."
-                  : `保存 ${trainingDay === "volume" ? "5×5" : trainingDay === "recovery" ? "5×3" : "1×5"}`}
-              </Text>
-            </Pressable>
+            {/* 备注 */}
+            <View style={styles.inputGroupLast}>
+              <Text style={styles.inputLabel}>备注</Text>
+              <View style={[styles.inputContainer, styles.textAreaContainer]}>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={currentLog.notes}
+                  onChangeText={(value) => updateLogField("notes", value)}
+                  placeholder="训练感受、技术要点等"
+                  placeholderTextColor="#C7C7CC"
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              </View>
+            </View>
           </View>
 
-          {/* Texas 说明 */}
-          <View style={styles.infoSection}>
-            <Text style={styles.infoTitle}>德州训练法说明</Text>
-            <Text style={styles.infoText}>
-              • 容量日：5组×5次（上周强度日重量的90%）
-            </Text>
-            <Text style={styles.infoText}>
-              • 恢复日：5组×3次（容量日重量的80-90%）
-            </Text>
-            <Text style={styles.infoText}>• 强度日：1组×5次（冲击新重量）</Text>
-            <Text style={styles.infoText}>• 每周重量递增2.5-5kg</Text>
-          </View>
+          {/* 最近训练记录 */}
+          <View style={styles.historyCard}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="time-outline" size={18} color="#6A4C93" />
+              <Text style={styles.cardTitle}>最近训练记录</Text>
+              {recentLogs.length > 0 && (
+                <Text style={styles.cardCount}>{recentLogs.length} 条</Text>
+              )}
+            </View>
 
-          <View style={{ height: 150 }} />
+            {loading ? (
+              <View style={styles.emptyState}>
+                <ActivityIndicator size="small" color="#6A4C93" />
+                <Text style={styles.emptyText}>加载中...</Text>
+              </View>
+            ) : recentLogs.length > 0 ? (
+              recentLogs.map((log, index) => (
+                <View
+                  key={log.id}
+                  style={[
+                    styles.historyItem,
+                    index === recentLogs.length - 1 && styles.historyItemLast,
+                  ]}
+                >
+                  <View style={styles.historyHeader}>
+                    <Text style={styles.historyExercise}>{log.exercise}</Text>
+                    <Text style={styles.historyDate}>{log.date}</Text>
+                  </View>
+                  <Text style={styles.historyDetails}>
+                    {log.weight} kg × {log.reps} 次
+                  </Text>
+                  {log.notes ? (
+                    <Text style={styles.historyNotes}>{log.notes}</Text>
+                  ) : null}
+                  <Pressable
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteLog(log.id)}
+                  >
+                    <Ionicons name="trash-outline" size={14} color="#FF3B30" />
+                    <Text style={styles.deleteButtonText}>删除</Text>
+                  </Pressable>
+                </View>
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="document-outline" size={32} color="#C7C7CC" />
+                <Text style={styles.emptyText}>暂无德州训练记录</Text>
+                <Text style={styles.emptySubtext}>完成训练后点击保存记录</Text>
+              </View>
+            )}
+          </View>
         </ScrollView>
+      {/* 底部按钮 */}
+      <View style={[styles.footer, { paddingBottom: insets.bottom }]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.saveButton,
+            pressed && styles.saveButtonPressed,
+            loading && styles.saveButtonDisabled,
+          ]}
+          onPress={handleSaveLog}
+          disabled={loading}
+          android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <>
+              <Ionicons name="save-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.saveButtonText}>保存记录</Text>
+            </>
+          )}
+        </Pressable>
+      </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
-    paddingHorizontal: 16,
+    backgroundColor: "#F7F6FA",
   },
-  keyboardAvoidingView: {
+  scrollView: {
     flex: 1,
   },
-  scrollViewContent: {
+  scrollContent: {
+    paddingHorizontal: 20,
     paddingBottom: 20,
   },
-  title: {
-    color: "#1C1C1E",
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#8E8E93",
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  daySelector: {
+
+  // 顶部标题区
+  header: {
     flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    gap: 14,
+  },
+  headerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#F3F0FF",
+    alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
-    gap: 12,
   },
-  dayButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+  headerText: {
+    flex: 1,
   },
-  dayButtonActive: {
-    backgroundColor: "#FF9500",
-    borderColor: "#FF9500",
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1C1C1E",
+    marginBottom: 2,
+    letterSpacing: -0.3,
   },
-  dayButtonText: {
-    color: "#4A4A4A",
-    fontSize: 14,
-    fontWeight: "500",
+  headerSubtitle: {
+    fontSize: 13,
+    color: "#8E8E93",
+    lineHeight: 18,
+    fontWeight: "400",
   },
-  dayButtonTextActive: {
-    color: "#FFFFFF",
-  },
-  logForm: {
+
+  // 表单卡片
+  formCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
+    padding: 18,
+    marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 2,
   },
-  inputRow: {
-    marginBottom: 16,
+  inputGroup: {
+    marginBottom: 14,
   },
-  label: {
-    color: "#4A4A4A",
+  inputGroupLast: {
+    marginBottom: 0,
+  },
+  inputLabel: {
     fontSize: 14,
-    marginBottom: 6,
-    fontWeight: "500",
+    fontWeight: "600",
+    color: "#3C3C43",
+    marginBottom: 8,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F7F7F8",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#EDEDF0",
+    paddingHorizontal: 14,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    flex: 1,
+    height: 44,
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#1C1C1E",
+  },
+  textAreaContainer: {
+    alignItems: "flex-start",
+    paddingVertical: 10,
   },
   textArea: {
-    height: 80,
+    height: 70,
     textAlignVertical: "top",
   },
+  unit: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#8E8E93",
+    marginLeft: 8,
+  },
+
+  // 动作选择
   exerciseSelector: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -353,48 +397,154 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderWidth: 1.5,
+    borderColor: "#E5E5EA",
+    backgroundColor: "#FAFAFA",
   },
   exerciseButtonActive: {
-    backgroundColor: "#FF9500",
-    borderColor: "#FF9500",
+    backgroundColor: "#F3F0FF",
+    borderColor: "#6A4C93",
   },
   exerciseButtonText: {
-    color: "#4A4A4A",
+    color: "#8E8E93",
     fontSize: 14,
+    fontWeight: "600",
   },
   exerciseButtonTextActive: {
-    color: "#FFFFFF",
+    color: "#6A4C93",
+  },
+
+  // 历史记录卡片
+  historyCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+    gap: 8,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1C1C1E",
+    flex: 1,
+  },
+  cardCount: {
+    fontSize: 12,
+    color: "#8E8E93",
+    backgroundColor: "#F0F0F3",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  historyItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F3",
+    position: "relative",
+  },
+  historyItemLast: {
+    borderBottomWidth: 0,
+  },
+  historyHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  historyExercise: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1C1C1E",
+  },
+  historyDate: {
+    fontSize: 12,
+    color: "#8E8E93",
+  },
+  historyDetails: {
+    fontSize: 14,
+    color: "#6A4C93",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  historyNotes: {
+    fontSize: 12,
+    color: "#8E8E93",
+    fontStyle: "italic",
+    lineHeight: 16,
+    marginBottom: 6,
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    alignSelf: "flex-end",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  deleteButtonText: {
+    fontSize: 12,
+    color: "#FF3B30",
+    fontWeight: "500",
+  },
+
+  // 空状态
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 24,
+    gap: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#8E8E93",
+  },
+  emptySubtext: {
+    fontSize: 12,
+    color: "#C7C7CC",
+  },
+
+  // 底部按钮
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    backgroundColor: "#F7F6FA",
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E5",
   },
   saveButton: {
-    backgroundColor: "#FF9500",
-    borderRadius: 12,
-    paddingVertical: 16,
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
+    justifyContent: "center",
+    backgroundColor: "#6A4C93",
+    borderRadius: 14,
+    paddingVertical: 16,
+    gap: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  saveButtonPressed: {
+    backgroundColor: "#5A3D80",
+    transform: [{ scale: 0.98 }],
+  },
+  saveButtonDisabled: {
+    opacity: 0.6,
   },
   saveButtonText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
-  },
-  infoSection: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-  },
-  infoTitle: {
-    color: "#1C1C1E",
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 12,
-  },
-  infoText: {
-    color: "#4A4A4A",
-    fontSize: 14,
-    marginBottom: 4,
-    lineHeight: 20,
+    letterSpacing: 0.3,
   },
 });

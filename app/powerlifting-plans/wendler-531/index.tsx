@@ -48,14 +48,6 @@ export default function Wendler531Page() {
           params: { planData: JSON.stringify(examplePlanData) },
         }),
     },
-    {
-      id: "log",
-      title: "查看训练记录",
-      subtitle: "回顾历史训练数据和进度变化",
-      icon: "document-text-outline",
-      color: "#6A4C93",
-      onPress: () => router.push(`/powerlifting-plans/wendler-531/wendler-log`),
-    },
   ];
 
   return (

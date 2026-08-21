@@ -49,6 +49,7 @@ export default function WendlerLog() {
       weight: parseFloat(currentLog.weight),
       reps: parseInt(currentLog.reps),
       notes: currentLog.notes,
+      plan: "wendler",
     });
 
     if (success) {
@@ -69,7 +70,7 @@ export default function WendlerLog() {
     setCurrentLog((prev) => ({ ...prev, [field]: value }));
   };
 
-  const recentLogs = getRecentLogs(5);
+  const recentLogs = getRecentLogs(10, "wendler");
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>

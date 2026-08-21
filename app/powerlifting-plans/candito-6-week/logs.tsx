@@ -27,7 +27,9 @@ export default function TrainingLogsScreen() {
 
   useEffect(() => {
     if (!loading) {
-      const filteredLogs = logs.filter((log) => log.date === selectedDate);
+      const filteredLogs = logs.filter(
+        (log) => log.date === selectedDate && log.plan === "candito",
+      );
       setDateLogs(filteredLogs);
     }
   }, [logs, loading, selectedDate]);
@@ -140,7 +142,7 @@ export default function TrainingLogsScreen() {
 
         <View style={styles.historyGrid}>
           {logs
-            .filter((log) => log.date !== selectedDate)
+            .filter((log) => log.date !== selectedDate && log.plan === "candito")
             .slice(0, 6)
             .map((log) => (
               <TouchableOpacity

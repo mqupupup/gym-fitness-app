@@ -225,4 +225,50 @@ const styles = StyleSheet.create({
     color: "#8E8E93",
     lineHeight: 17,
   },
+
+  // 分隔线
+  sectionDivider: {
+    height: 1,
+    backgroundColor: "#E8E8ED",
+    marginVertical: 16,
+  },
+
+  // 查看训练记录入口卡片
+  logEntryCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F3F0FF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 10,
+    borderWidth: 1.5,
+    borderColor: "#6A4C93",
+    gap: 14,
+  },
+  logEntryCardPressed: {
+    backgroundColor: "#E8E3FF",
+    transform: [{ scale: 0.99 }],
+  },
+  logEntryIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logEntryContent: {
+    flex: 1,
+  },
+  logEntryTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#6A4C93",
+    marginBottom: 3,
+  },
+  logEntrySubtitle: {
+    fontSize: 13,
+    color: "#7C6C9D",
+    lineHeight: 17,
+  },
 });

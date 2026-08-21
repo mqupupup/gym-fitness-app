@@ -1,7 +1,6 @@
-import { useNavigation } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { Stack, useNavigation } from "expo-router";
+import { useLayoutEffect, useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,404 +10,440 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { useTrainingLog } from "../../../src/hooks/useTrainingLog";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function TexasSplit() {
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const scrollViewRef = useRef<ScrollView>(null);
-  const { saveLog, loading } = useTrainingLog();
 
-  const [currentDay, setCurrentDay] = useState<
-    "monday" | "wednesday" | "friday"
-  >("monday");
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split("T")[0],
-    exercise: "",
-    weight: "",
-    reps: "",
-    notes: "",
+  const [oneRMs, setOneRMs] = useState({
+    squat: "",
+    bench: "",
+    deadlift: "",
+    press: "",
   });
 
-  const exercises = ["深蹲", "卧推", "硬拉", "推举"];
+  const [currentDay, setCurrentDay] = useState<"monday" | "tuesday" | "thursday" | "friday">("monday");
 
-  const getRecommendedExercises = () => {
-    if (currentDay === "monday") return ["卧推"];
-    if (currentDay === "wednesday") return ["深蹲", "硬拉"];
-    if (currentDay === "friday") return ["深蹲", "硬拉"];
-    return exercises;
-  };
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: "德州-4日分化" });
+  }, [navigation]);
 
   const getDayTitle = () => {
     const titles = {
-      monday: "周一：容量日 - 卧推",
-      wednesday: "周三：容量日 - 深蹲/硬拉",
-      friday: "周五：强度日 - 深蹲/硬拉",
+      monday: "周一 · 容量日",
+      tuesday: "周二 · 容量日",
+      thursday: "周四 · 强度日",
+      friday: "周五 · 强度日",
     };
     return titles[currentDay];
   };
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: "德州-4日分化",
-      headerTitle: "德州-4日分化",
-    });
-  }, [navigation]);
-
-  const handleSaveLog = async () => {
-    if (!formData.exercise || !formData.weight) {
-      Alert.alert("错误", "请填写动作和重量");
-      return;
-    }
-
-    const success = await saveLog({
-      date: formData.date,
-      exercise: formData.exercise,
-      weight: parseFloat(formData.weight),
-      reps: parseInt(formData.reps) || 5,
-      notes: `Texas Split - ${getDayTitle()}${formData.notes ? ` | ${formData.notes}` : ""}`,
-    });
-
-    if (success) {
-      Alert.alert("成功", "训练记录已保存！");
-      setFormData((prev) => ({
-        ...prev,
-        weight: "",
-        reps: "",
-        notes: "",
-      }));
-    } else {
-      Alert.alert("错误", "保存失败，请重试");
-    }
+  const calcWeight = (oneRM: string, percentage: number) => {
+    const weight = parseFloat(oneRM);
+    if (isNaN(weight) || weight <= 0) return "--";
+    return (Math.round(weight * percentage * 2) / 2).toFixed(1);
   };
 
-  const updateField = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const hasAny1RM = Object.values(oneRMs).some((v) => parseFloat(v) > 0);
+
+  const update1RM = (key: string, value: string) => {
+    setOneRMs((prev) => ({ ...prev, [key]: value }));
   };
 
-  const recommendedExercises = getRecommendedExercises();
+  const dayConfigs = {
+    monday: {
+      type: "容量日",
+      typeColor: "#6A4C93",
+      typeBg: "#F3F0FF",
+      exercises: [
+        { name: "卧推", sets: "5×5", percentage: 0.7, oneRMKey: "bench", detail: "容量训练，注重动作质量" },
+      ],
+    },
+    tuesday: {
+      type: "容量日",
+      typeColor: "#6A4C93",
+      typeBg: "#F3F0FF",
+      exercises: [
+        { name: "深蹲", sets: "5×5", percentage: 0.7, oneRMKey: "squat", detail: "容量训练，注重动作质量" },
+        { name: "硬拉", sets: "3×3", percentage: 0.65, oneRMKey: "deadlift", detail: "辅助训练，不要力竭" },
+      ],
+    },
+    thursday: {
+      type: "强度日",
+      typeColor: "#FF3B30",
+      typeBg: "#FFE8E8",
+      exercises: [
+        { name: "卧推", sets: "1×5", percentage: 0.82, oneRMKey: "bench", detail: "比上一次强度日增加1~1.5kg" },
+      ],
+    },
+    friday: {
+      type: "强度日",
+      typeColor: "#FF3B30",
+      typeBg: "#FFE8E8",
+      exercises: [
+        { name: "深蹲", sets: "1×5", percentage: 0.85, oneRMKey: "squat", detail: "比上一次强度日增加2.5kg" },
+        { name: "硬拉", sets: "1×3", percentage: 0.85, oneRMKey: "deadlift", detail: "冲击新重量" },
+      ],
+    },
+  };
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView style={styles.container}>
+      <Stack.Screen options={{ title: "德州-4日分化" }} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={insets.top + 60}
       >
         <ScrollView
-          ref={scrollViewRef}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollViewContent}
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.title}>4日分化计划</Text>
-          <Text style={styles.subtitle}>容量日和强度日分开训练</Text>
+          {/* 顶部标题区 */}
+          <View style={styles.header}>
+            <View style={styles.headerIcon}>
+              <Ionicons name="grid-outline" size={24} color="#6A4C93" />
+            </View>
+            <View style={styles.headerText}>
+              <Text style={styles.headerTitle}>4 日分化计划</Text>
+              <Text style={styles.headerSubtitle}>容量日与强度日分开，适合进阶训练者</Text>
+            </View>
+          </View>
+
+          {/* 1RM 输入卡片 */}
+          <View style={styles.inputCard}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="calculator-outline" size={18} color="#6A4C93" />
+              <Text style={styles.cardTitle}>输入你的 1RM</Text>
+            </View>
+            <View style={styles.inputGrid}>
+              {[
+                { key: "squat", label: "深蹲" },
+                { key: "bench", label: "卧推" },
+                { key: "deadlift", label: "硬拉" },
+                { key: "press", label: "推举" },
+              ].map((item) => (
+                <View key={item.key} style={styles.inputItem}>
+                  <Text style={styles.inputLabel}>{item.label}</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.numberInput}
+                      value={oneRMs[item.key as keyof typeof oneRMs]}
+                      onChangeText={(v) => update1RM(item.key, v)}
+                      keyboardType="numeric"
+                      placeholder="0"
+                      placeholderTextColor="#C7C7CC"
+                    />
+                    <Text style={styles.inputUnit}>kg</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+            {!hasAny1RM && (
+              <Text style={styles.inputHint}>输入 1RM 后自动计算训练重量</Text>
+            )}
+          </View>
 
           {/* 训练日选择 */}
-          <View style={styles.daySelector}>
-            <Pressable
-              style={[
-                styles.dayButton,
-                currentDay === "monday" && styles.dayButtonActive,
-              ]}
-              onPress={() => setCurrentDay("monday")}
-            >
-              <Text
-                style={[
-                  styles.dayButtonText,
-                  currentDay === "monday" && styles.dayButtonTextActive,
-                ]}
-              >
-                周一
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.dayButton,
-                currentDay === "wednesday" && styles.dayButtonActive,
-              ]}
-              onPress={() => setCurrentDay("wednesday")}
-            >
-              <Text
-                style={[
-                  styles.dayButtonText,
-                  currentDay === "wednesday" && styles.dayButtonTextActive,
-                ]}
-              >
-                周三
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.dayButton,
-                currentDay === "friday" && styles.dayButtonActive,
-              ]}
-              onPress={() => setCurrentDay("friday")}
-            >
-              <Text
-                style={[
-                  styles.dayButtonText,
-                  currentDay === "friday" && styles.dayButtonTextActive,
-                ]}
-              >
-                周五
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.logForm}>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>日期</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.date}
-                onChangeText={(value) => updateField("date", value)}
-                placeholder="YYYY-MM-DD"
-              />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayScroll}>
+            <View style={styles.daySelector}>
+              {[
+                { key: "monday", label: "周一", sub: "容量日" },
+                { key: "tuesday", label: "周二", sub: "容量日" },
+                { key: "thursday", label: "周四", sub: "强度日" },
+                { key: "friday", label: "周五", sub: "强度日" },
+              ].map((day) => (
+                <Pressable
+                  key={day.key}
+                  style={[
+                    styles.dayButton,
+                    currentDay === day.key && styles.dayButtonActive,
+                  ]}
+                  onPress={() => setCurrentDay(day.key as typeof currentDay)}
+                >
+                  <Text style={[styles.dayButtonText, currentDay === day.key && styles.dayButtonTextActive]}>
+                    {day.label}
+                  </Text>
+                  <Text style={[styles.dayButtonSub, currentDay === day.key && styles.dayButtonSubActive]}>
+                    {day.sub}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
+          </ScrollView>
 
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>动作</Text>
-              <View style={styles.exerciseSelector}>
-                {recommendedExercises.map((exercise) => (
-                  <Pressable
-                    key={exercise}
-                    style={[
-                      styles.exerciseButton,
-                      formData.exercise === exercise &&
-                        styles.exerciseButtonActive,
-                    ]}
-                    onPress={() => updateField("exercise", exercise)}
-                  >
-                    <Text
-                      style={[
-                        styles.exerciseButtonText,
-                        formData.exercise === exercise &&
-                          styles.exerciseButtonTextActive,
-                      ]}
-                    >
-                      {exercise}
-                    </Text>
-                  </Pressable>
-                ))}
+          {/* 训练计划详情 */}
+          <View style={styles.planCard}>
+            <View style={styles.planHeader}>
+              <View style={[styles.planTypeBadge, { backgroundColor: dayConfigs[currentDay].typeBg }]}>
+                <Text style={[styles.planTypeText, { color: dayConfigs[currentDay].typeColor }]}>
+                  {dayConfigs[currentDay].type}
+                </Text>
               </View>
+              <Text style={styles.planDayTitle}>{getDayTitle()}</Text>
             </View>
 
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>重量 (kg)</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.weight}
-                onChangeText={(value) => updateField("weight", value)}
-                keyboardType="numeric"
-                placeholder="例如: 100"
-              />
-            </View>
-
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>次数</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.reps}
-                onChangeText={(value) => updateField("reps", value)}
-                keyboardType="numeric"
-                placeholder="例如: 5"
-              />
-            </View>
-
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>备注</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={formData.notes}
-                onChangeText={(value) => updateField("notes", value)}
-                placeholder="RPE、技术要点等"
-                multiline
-                numberOfLines={2}
-              />
-            </View>
-
-            <Pressable
-              style={styles.saveButton}
-              onPress={handleSaveLog}
-              disabled={loading}
-            >
-              <Text style={styles.saveButtonText}>
-                {loading ? "保存中..." : "保存训练记录"}
-              </Text>
-            </Pressable>
+            {dayConfigs[currentDay].exercises.map((ex, idx) => (
+              <View key={idx} style={styles.exerciseBlock}>
+                <View style={styles.exerciseHeader}>
+                  <Text style={styles.exerciseName}>{ex.name}</Text>
+                  <Text style={styles.exerciseSets}>{ex.sets}</Text>
+                </View>
+                {ex.detail && (
+                  <Text style={styles.exerciseDetail}>{ex.detail}</Text>
+                )}
+                <View style={styles.weightRow}>
+                  <Text style={styles.weightLabel}>参考重量</Text>
+                  <Text style={styles.weightValue}>
+                    {calcWeight(oneRMs[ex.oneRMKey as keyof typeof oneRMs], ex.percentage)} kg
+                  </Text>
+                  <Text style={styles.weightPct}>(约{Math.round(ex.percentage * 100)}% 1RM)</Text>
+                </View>
+              </View>
+            ))}
           </View>
 
-          {/* 计划详情 */}
-          <View style={styles.infoSection}>
-            <Text style={styles.infoTitle}>训练计划详情</Text>
-            <Text style={styles.infoSubtitle}>4日分化计划</Text>
-            <Text style={styles.infoText}>• 周一：容量日 - 卧推5×5</Text>
-            <Text style={styles.infoText}>• 周二：容量日 - 深蹲5×5, 硬拉</Text>
-            <Text style={styles.infoText}>• 周四：高强度 - 卧推</Text>
-            <Text style={styles.infoText}>• 周五：高强度 - 深蹲, 硬拉</Text>
-            <Text style={styles.infoTextNote}>
-              注：周二和周四的训练需手动记录
-            </Text>
-          </View>
-
-          <View style={{ height: 150 }} />
+          <View style={{ height: 20 }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-// 样式部分与前面两个文件相同
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
-    paddingHorizontal: 16,
+    backgroundColor: "#F7F6FA",
   },
   keyboardAvoidingView: {
     flex: 1,
   },
-  scrollViewContent: {
-    paddingBottom: 20,
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
-  title: {
-    color: "#1C1C1E",
-    fontSize: 24,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    gap: 14,
+  },
+  headerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#F3F0FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerText: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 22,
     fontWeight: "700",
-    marginBottom: 8,
+    color: "#1C1C1E",
+    marginBottom: 2,
+    letterSpacing: -0.3,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: "#8E8E93",
+    lineHeight: 18,
+  },
+  inputCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  logCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+    gap: 8,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1C1C1E",
+  },
+  inputGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  inputItem: {
+    width: "47%",
+  },
+  inputLabel: {
+    fontSize: 13,
+    color: "#8E8E93",
+    marginBottom: 6,
+    fontWeight: "500",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F7F7F8",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  numberInput: {
+    flex: 1,
+    paddingVertical: 10,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1C1C1E",
+  },
+  inputUnit: {
+    fontSize: 13,
+    color: "#8E8E93",
+    fontWeight: "500",
+  },
+  inputHint: {
+    fontSize: 12,
+    color: "#6A4C93",
+    marginTop: 10,
     textAlign: "center",
   },
-  subtitle: {
-    color: "#8E8E93",
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: "center",
+  dayScroll: {
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   daySelector: {
     flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-    marginBottom: 20,
+    gap: 10,
   },
   dayButton: {
-    paddingHorizontal: 24,
+    width: 72,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     paddingVertical: 12,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#E8E8ED",
   },
   dayButtonActive: {
-    backgroundColor: "#FF9500",
-    borderColor: "#FF9500",
+    backgroundColor: "#6A4C93",
+    borderColor: "#6A4C93",
   },
   dayButtonText: {
-    color: "#4A4A4A",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
+    color: "#3C3C43",
   },
   dayButtonTextActive: {
     color: "#FFFFFF",
   },
-  logForm: {
+  dayButtonSub: {
+    fontSize: 11,
+    color: "#8E8E93",
+    marginTop: 2,
+  },
+  dayButtonSubActive: {
+    color: "rgba(255,255,255,0.75)",
+  },
+  planCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
+    padding: 18,
+    marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 2,
   },
-  inputRow: {
-    marginBottom: 16,
-  },
-  label: {
-    color: "#4A4A4A",
-    fontSize: 14,
-    marginBottom: 6,
-    fontWeight: "500",
-  },
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-  exerciseSelector: {
+  planHeader: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  exerciseButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-  },
-  exerciseButtonActive: {
-    backgroundColor: "#FF9500",
-    borderColor: "#FF9500",
-  },
-  exerciseButtonText: {
-    color: "#4A4A4A",
-    fontSize: 14,
-  },
-  exerciseButtonTextActive: {
-    color: "#FFFFFF",
-  },
-  saveButton: {
-    backgroundColor: "#FF9500",
-    borderRadius: 12,
-    paddingVertical: 16,
     alignItems: "center",
-    marginTop: 10,
+    gap: 10,
+    marginBottom: 14,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F3",
   },
-  saveButtonText: {
-    color: "#FFFFFF",
+  planTypeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  planTypeText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  planDayTitle: {
     fontSize: 16,
-    fontWeight: "600",
-  },
-  infoSection: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-  },
-  infoTitle: {
+    fontWeight: "700",
     color: "#1C1C1E",
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 12,
   },
-  infoSubtitle: {
-    color: "#FF9500",
-    fontSize: 16,
-    fontWeight: "600",
+  exerciseBlock: {
+    backgroundColor: "#F7F6FA",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+  },
+  exerciseHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
-  infoText: {
-    color: "#4A4A4A",
-    fontSize: 14,
-    marginBottom: 4,
-    lineHeight: 20,
+  exerciseName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1C1C1E",
   },
-  infoTextNote: {
-    color: "#FF9500",
-    fontSize: 14,
+  exerciseSets: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#6A4C93",
+    backgroundColor: "#F3F0FF",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  exerciseDetail: {
+    fontSize: 12,
+    color: "#8E8E93",
+    marginBottom: 8,
     fontStyle: "italic",
-    marginTop: 8,
+  },
+  weightRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  weightLabel: {
+    fontSize: 13,
+    color: "#8E8E93",
+  },
+  weightValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#6A4C93",
+  },
+  weightPct: {
+    fontSize: 12,
+    color: "#8E8E93",
   },
 });

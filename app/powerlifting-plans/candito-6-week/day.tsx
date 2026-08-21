@@ -193,6 +193,7 @@ export default function CanditoTrainingDay() {
           weight,
           reps,
           notes: `${logData.notes || ""} | 计划: ${weekData.title} | ${dayData.dateLabel}`,
+          plan: "candito",
         });
 
         if (success) {
