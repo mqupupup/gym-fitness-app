@@ -13,20 +13,6 @@ export default function Wendler531Page() {
     navigation.setOptions({ title: "Wendler 5-3-1" });
   }, [navigation]);
 
-  // 示例计划数据
-  const examplePlanData = {
-    userWeight: 85,
-    barWeight: 20,
-    lifts: {
-      squat: { weight: 140, reps: 5, oneRepMax: 156.8 },
-      bench: { weight: 90, reps: 5, oneRepMax: 100.8 },
-      deadlift: { weight: 160, reps: 5, oneRepMax: 179.2 },
-      press: { weight: 60, reps: 5, oneRepMax: 67.2 },
-    },
-    progression: { squat: 10, bench: 5, deadlift: 10, press: 5 },
-    bbbPercentage: 50,
-  };
-
   const actions = [
     {
       id: "start",
@@ -35,18 +21,6 @@ export default function Wendler531Page() {
       icon: "create-outline",
       color: "#6A4C93",
       onPress: () => router.push(`/powerlifting-plans/wendler-531/wendler-input`),
-    },
-    {
-      id: "example",
-      title: "查看示例计划",
-      subtitle: "预览 85kg 训练者的完整 4 周计划",
-      icon: "eye-outline",
-      color: "#6A4C93",
-      onPress: () =>
-        router.push({
-          pathname: `/powerlifting-plans/wendler-531/wendler-detail`,
-          params: { planData: JSON.stringify(examplePlanData) },
-        }),
     },
   ];
 
