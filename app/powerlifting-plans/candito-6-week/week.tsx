@@ -6,7 +6,7 @@ import {
     SafeAreaView,
     useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { CANDITO_PROGRAM } from "./candito-data";
+import { CANDITO_PROGRAM } from "../../../src/data/candito-data";
 
 export default function CanditoWeekDetail() {
   const insets = useSafeAreaInsets();

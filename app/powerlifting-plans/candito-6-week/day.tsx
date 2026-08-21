@@ -18,7 +18,7 @@ import {
 } from "react-native-safe-area-context";
 import { TrainingLogCard } from "../../../src/components/TrainingLogCard";
 import { useTrainingLog } from "../../../src/hooks/useTrainingLog";
-import { CANDITO_PROGRAM } from "./candito-data";
+import { CANDITO_PROGRAM } from "../../../src/data/candito-data";
 
 export default function CanditoTrainingDay() {
   const insets = useSafeAreaInsets();

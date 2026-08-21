@@ -133,7 +133,7 @@ export default function GZCLPIndex() {
 
         {/* 底部提示 */}
         <View style={styles.footer}>
-          <Ionicons name="lightbulb-outline" size={14} color="#8E8E93" />
+          <Ionicons name="bulb-outline" size={14} color="#8E8E93" />
           <Text style={styles.footerText}>点击任意训练日开始你的训练</Text>
         </View>
       </ScrollView>

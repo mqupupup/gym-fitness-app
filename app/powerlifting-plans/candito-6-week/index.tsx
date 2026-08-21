@@ -4,7 +4,7 @@ import { useLayoutEffect } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { CANDITO_PROGRAM } from "./candito-data";
+import { CANDITO_PROGRAM } from "../../../src/data/candito-data";
 
 export default function CanditoPlanIndex() {
   const router = useRouter();
