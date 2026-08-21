@@ -1,5 +1,7 @@
-import { useNavigation, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { Stack, useRouter } from "expo-router";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -11,21 +13,23 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const LIFT_FIELDS = [
+  { key: "squat", label: "深蹲", weightPlaceholder: "例如: 140" },
+  { key: "bench", label: "卧推", weightPlaceholder: "例如: 90" },
+  { key: "deadlift", label: "硬拉", weightPlaceholder: "例如: 160" },
+  { key: "press", label: "推举", weightPlaceholder: "例如: 60" },
+];
 
 export default function WendlerInput() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null);
-  useEffect(() => {
-    navigation.setOptions({
-      title: "Wendler计划设置",
-      headerTitle: "Wendler计划设置",
-    });
+  const insets = useSafeAreaInsets();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: "Wendler 计划设置" });
   }, [navigation]);
 
   const [formData, setFormData] = useState({
@@ -47,12 +51,10 @@ export default function WendlerInput() {
   });
 
   const calculateOneRepMax = (weight: number, reps: number): number => {
-    // 使用Brzycki公式估算1RM
     return weight * (36 / (37 - reps));
   };
 
   const handleCalculatePlan = () => {
-    // 验证必填字段
     if (
       !formData.weight ||
       !formData.squatWeight ||
@@ -60,11 +62,10 @@ export default function WendlerInput() {
       !formData.deadliftWeight ||
       !formData.pressWeight
     ) {
-      Alert.alert("错误", "请填写所有必填字段");
+      Alert.alert("请填写所有必填字段");
       return;
     }
 
-    // 计算1RM值
     const squat1RM = calculateOneRepMax(
       parseFloat(formData.squatWeight),
       parseInt(formData.squatReps),
@@ -82,7 +83,6 @@ export default function WendlerInput() {
       parseInt(formData.pressReps),
     );
 
-    // 构建计划数据
     const planData = {
       userWeight: parseFloat(formData.weight),
       barWeight: parseFloat(formData.barWeight),
@@ -117,7 +117,6 @@ export default function WendlerInput() {
       bbbPercentage: parseFloat(formData.bbbPercentage),
     };
 
-    // 导航到详情页面并传递数据
     router.push({
       pathname: "./wendler-detail",
       params: { planData: JSON.stringify(planData) },
@@ -128,324 +127,338 @@ export default function WendlerInput() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // 处理输入框聚焦，自动滚动到可见区域
-  const handleTextInputFocus = (
-    scrollView: ScrollView | null,
-    index: number,
-  ) => {
-    if (scrollView) {
-      // 延迟一点时间确保键盘已经弹起
-      setTimeout(() => {
-        scrollView.scrollTo({
-          y: index * 80 - 100, // 根据输入框位置调整滚动距离
-          animated: true,
-        });
-      }, 100);
-    }
-  };
-
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <Stack.Screen options={{ title: "Wendler 计划设置" }} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "height" : undefined}
+        keyboardVerticalOffset={insets.top + 44}
         style={{ flex: 1 }}
       >
         <ScrollView
           ref={scrollViewRef}
+          style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.scrollContent}
         >
-          <Text style={styles.title}>Wendler 5-3-1 计划设置</Text>
+          {/* 顶部标题区 */}
+          <View style={styles.header}>
+            <View style={styles.headerIcon}>
+              <Ionicons name="create-outline" size={24} color="#6A4C93" />
+            </View>
+            <View style={styles.headerText}>
+              <Text style={styles.headerTitle}>Wendler 计划设置</Text>
+              <Text style={styles.headerSubtitle}>
+                输入你的数据，生成个性化 4 周训练计划
+              </Text>
+            </View>
+          </View>
 
           {/* 用户基本信息 */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>用户信息</Text>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>体重 (kg)</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.weight}
-                onChangeText={(value) => updateField("weight", value)}
-                keyboardType="numeric"
-                placeholder="例如: 85"
-                onFocus={() => handleTextInputFocus(scrollViewRef.current, 0)}
-              />
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>基本信息</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>体重</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={formData.weight}
+                  onChangeText={(value) => updateField("weight", value)}
+                  keyboardType="numeric"
+                  placeholder="请输入体重"
+                  placeholderTextColor="#C7C7CC"
+                />
+                <Text style={styles.unit}>kg</Text>
+              </View>
             </View>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>杠铃重量 (kg)</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.barWeight}
-                onChangeText={(value) => updateField("barWeight", value)}
-                keyboardType="numeric"
-                placeholder="默认: 20"
-                onFocus={() => handleTextInputFocus(scrollViewRef.current, 1)}
-              />
+            <View style={styles.inputGroupLast}>
+              <Text style={styles.inputLabel}>杠铃重量</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={formData.barWeight}
+                  onChangeText={(value) => updateField("barWeight", value)}
+                  keyboardType="numeric"
+                  placeholder="默认 20"
+                  placeholderTextColor="#C7C7CC"
+                />
+                <Text style={styles.unit}>kg</Text>
+              </View>
             </View>
           </View>
 
           {/* 四项动作输入 */}
-          <View style={styles.section}>
+          <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>四项动作最大重量</Text>
-
-            <View style={styles.liftInput}>
-              <Text style={styles.liftTitle}>深蹲 (Squat)</Text>
-              <View style={styles.inputRow}>
-                <Text style={styles.label}>重量 (kg)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.squatWeight}
-                  onChangeText={(value) => updateField("squatWeight", value)}
-                  keyboardType="numeric"
-                  placeholder="例如: 140"
-                  onFocus={() => handleTextInputFocus(scrollViewRef.current, 2)}
-                />
+            {LIFT_FIELDS.map((lift, index) => (
+              <View
+                key={lift.key}
+                style={[
+                  styles.liftCard,
+                  index === LIFT_FIELDS.length - 1 && styles.liftCardLast,
+                ]}
+              >
+                <Text style={styles.liftTitle}>{lift.label}</Text>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>重量</Text>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      value={
+                        formData[`${lift.key}Weight` as keyof typeof formData]
+                      }
+                      onChangeText={(value) =>
+                        updateField(`${lift.key}Weight`, value)
+                      }
+                      keyboardType="numeric"
+                      placeholder={lift.weightPlaceholder}
+                      placeholderTextColor="#C7C7CC"
+                    />
+                    <Text style={styles.unit}>kg</Text>
+                  </View>
+                </View>
+                <View style={styles.inputGroupLast}>
+                  <Text style={styles.inputLabel}>次数</Text>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      value={
+                        formData[`${lift.key}Reps` as keyof typeof formData]
+                      }
+                      onChangeText={(value) =>
+                        updateField(`${lift.key}Reps`, value)
+                      }
+                      keyboardType="numeric"
+                      placeholder="例如: 5"
+                      placeholderTextColor="#C7C7CC"
+                    />
+                    <Text style={styles.unit}>次</Text>
+                  </View>
+                </View>
               </View>
-              <View style={styles.inputRow}>
-                <Text style={styles.label}>次数</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.squatReps}
-                  onChangeText={(value) => updateField("squatReps", value)}
-                  keyboardType="numeric"
-                  placeholder="例如: 5"
-                  onFocus={() => handleTextInputFocus(scrollViewRef.current, 3)}
-                />
-              </View>
-            </View>
-
-            <View style={styles.liftInput}>
-              <Text style={styles.liftTitle}>卧推 (Bench Press)</Text>
-              <View style={styles.inputRow}>
-                <Text style={styles.label}>重量 (kg)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.benchWeight}
-                  onChangeText={(value) => updateField("benchWeight", value)}
-                  keyboardType="numeric"
-                  placeholder="例如: 90"
-                  onFocus={() => handleTextInputFocus(scrollViewRef.current, 4)}
-                />
-              </View>
-              <View style={styles.inputRow}>
-                <Text style={styles.label}>次数</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.benchReps}
-                  onChangeText={(value) => updateField("benchReps", value)}
-                  keyboardType="numeric"
-                  placeholder="例如: 5"
-                  onFocus={() => handleTextInputFocus(scrollViewRef.current, 5)}
-                />
-              </View>
-            </View>
-
-            <View style={styles.liftInput}>
-              <Text style={styles.liftTitle}>硬拉 (Deadlift)</Text>
-              <View style={styles.inputRow}>
-                <Text style={styles.label}>重量 (kg)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.deadliftWeight}
-                  onChangeText={(value) => updateField("deadliftWeight", value)}
-                  keyboardType="numeric"
-                  placeholder="例如: 160"
-                  onFocus={() => handleTextInputFocus(scrollViewRef.current, 6)}
-                />
-              </View>
-              <View style={styles.inputRow}>
-                <Text style={styles.label}>次数</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.deadliftReps}
-                  onChangeText={(value) => updateField("deadliftReps", value)}
-                  keyboardType="numeric"
-                  placeholder="例如: 5"
-                  onFocus={() => handleTextInputFocus(scrollViewRef.current, 7)}
-                />
-              </View>
-            </View>
-
-            <View style={styles.liftInput}>
-              <Text style={styles.liftTitle}>推举 (Shoulder Press)</Text>
-              <View style={styles.inputRow}>
-                <Text style={styles.label}>重量 (kg)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.pressWeight}
-                  onChangeText={(value) => updateField("pressWeight", value)}
-                  keyboardType="numeric"
-                  placeholder="例如: 60"
-                  onFocus={() => handleTextInputFocus(scrollViewRef.current, 8)}
-                />
-              </View>
-              <View style={styles.inputRow}>
-                <Text style={styles.label}>次数</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.pressReps}
-                  onChangeText={(value) => updateField("pressReps", value)}
-                  keyboardType="numeric"
-                  placeholder="例如: 5"
-                  onFocus={() => handleTextInputFocus(scrollViewRef.current, 9)}
-                />
-              </View>
-            </View>
+            ))}
           </View>
 
           {/* 进步速率设置 */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>每周期进步速率 (4周)</Text>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>深蹲增加 (kg)</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.squatProgression}
-                onChangeText={(value) => updateField("squatProgression", value)}
-                keyboardType="numeric"
-                placeholder="例如: 10"
-                onFocus={() => handleTextInputFocus(scrollViewRef.current, 10)}
-              />
-            </View>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>卧推增加 (kg)</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.benchProgression}
-                onChangeText={(value) => updateField("benchProgression", value)}
-                keyboardType="numeric"
-                placeholder="例如: 5"
-                onFocus={() => handleTextInputFocus(scrollViewRef.current, 11)}
-              />
-            </View>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>硬拉增加 (kg)</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.deadliftProgression}
-                onChangeText={(value) =>
-                  updateField("deadliftProgression", value)
-                }
-                keyboardType="numeric"
-                placeholder="例如: 10"
-                onFocus={() => handleTextInputFocus(scrollViewRef.current, 12)}
-              />
-            </View>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>推举增加 (kg)</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.pressProgression}
-                onChangeText={(value) => updateField("pressProgression", value)}
-                keyboardType="numeric"
-                placeholder="例如: 5"
-                onFocus={() => handleTextInputFocus(scrollViewRef.current, 13)}
-              />
-            </View>
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>每周期进步速率</Text>
+            {LIFT_FIELDS.map((lift, index) => (
+              <View
+                key={lift.key}
+                style={[
+                  styles.inputGroup,
+                  index === LIFT_FIELDS.length - 1 && styles.inputGroupLast,
+                ]}
+              >
+                <Text style={styles.inputLabel}>{lift.label}增加</Text>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    value={
+                      formData[
+                        `${lift.key}Progression` as keyof typeof formData
+                      ]
+                    }
+                    onChangeText={(value) =>
+                      updateField(`${lift.key}Progression`, value)
+                    }
+                    keyboardType="numeric"
+                    placeholder="例如: 10"
+                    placeholderTextColor="#C7C7CC"
+                  />
+                  <Text style={styles.unit}>kg</Text>
+                </View>
+              </View>
+            ))}
           </View>
 
           {/* 辅助训练设置 */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Boring But Big 辅助训练</Text>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>辅助训练百分比 (%)</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.bbbPercentage}
-                onChangeText={(value) => updateField("bbbPercentage", value)}
-                keyboardType="numeric"
-                placeholder="例如: 50"
-                onFocus={() => handleTextInputFocus(scrollViewRef.current, 14)}
-              />
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>BBB 辅助训练</Text>
+            <View style={styles.inputGroupLast}>
+              <Text style={styles.inputLabel}>辅助训练百分比</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={formData.bbbPercentage}
+                  onChangeText={(value) => updateField("bbbPercentage", value)}
+                  keyboardType="numeric"
+                  placeholder="例如: 50"
+                  placeholderTextColor="#C7C7CC"
+                />
+                <Text style={styles.unit}>%</Text>
+              </View>
             </View>
           </View>
-
-          {/* 开始按钮 */}
-          <Pressable style={styles.startButton} onPress={handleCalculatePlan}>
-            <Text style={styles.startButtonText}>生成训练计划</Text>
-          </Pressable>
-
-          {/* 底部填充，确保按钮不会被键盘遮挡 */}
-          <View style={{ height: 100 }} />
         </ScrollView>
+
+        {/* 底部按钮（固定位置，手动控制底部安全区） */}
+        <View style={[styles.footer, { paddingBottom: insets.bottom }]}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.submitButton,
+              pressed && styles.submitButtonPressed,
+            ]}
+            onPress={handleCalculatePlan}
+            android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+          >
+            <Ionicons name="flash-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.submitButtonText}>生成训练计划</Text>
+          </Pressable>
+        </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
-    paddingHorizontal: 16,
+    backgroundColor: "#F7F6FA",
   },
-  title: {
-    color: "#1C1C1E",
-    fontSize: 24,
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+
+  // 顶部标题区
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    gap: 14,
+  },
+  headerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#F3F0FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerText: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 22,
     fontWeight: "700",
-    marginBottom: 20,
-    textAlign: "center",
+    color: "#1C1C1E",
+    marginBottom: 2,
+    letterSpacing: -0.3,
   },
-  section: {
+  headerSubtitle: {
+    fontSize: 13,
+    color: "#8E8E93",
+    lineHeight: 18,
+    fontWeight: "400",
+  },
+
+  // 区域卡片
+  sectionCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    padding: 18,
+    marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 2,
   },
   sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
     color: "#1C1C1E",
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  liftInput: {
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: "#F8F8F8",
+
+  // 动作卡片
+  liftCard: {
+    backgroundColor: "#F7F6FA",
     borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+  },
+  liftCardLast: {
+    marginBottom: 0,
   },
   liftTitle: {
-    color: "#1C1C1E",
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#6A4C93",
+    marginBottom: 10,
   },
-  inputRow: {
+
+  // 输入组
+  inputGroup: {
+    marginBottom: 10,
+  },
+  inputGroupLast: {
+    marginBottom: 0,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#3C3C43",
+    marginBottom: 6,
+  },
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  label: {
-    color: "#4A4A4A",
-    fontSize: 14,
-    flex: 1,
+    backgroundColor: "#F7F7F8",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#EDEDF0",
+    paddingHorizontal: 14,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 8,
-    padding: 8,
+    flex: 1,
+    height: 44,
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#1C1C1E",
+  },
+  unit: {
     fontSize: 14,
-    width: 100,
-    textAlign: "right",
-  },
-  startButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  startButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
     fontWeight: "600",
+    color: "#8E8E93",
+    marginLeft: 8,
+  },
+
+  // 底部按钮
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    backgroundColor: "#F7F6FA",
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E5",
+  },
+  submitButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#6A4C93",
+    borderRadius: 14,
+    paddingVertical: 16,
+    gap: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  submitButtonPressed: {
+    backgroundColor: "#5A3D80",
+    transform: [{ scale: 0.98 }],
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "600",
+    letterSpacing: 0.3,
   },
 });
