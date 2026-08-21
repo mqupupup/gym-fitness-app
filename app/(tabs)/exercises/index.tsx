@@ -298,35 +298,36 @@ export default function ExercisesScreen() {
                 setProgressBarWidth((prev) => (prev === w ? prev : w));
               }}
             >
-              {uploadProgress < 100 ? (
-                <View
-                  style={[
-                    styles.lockProgressBarFill,
-                    { width: `${uploadProgress}%` },
-                  ]}
-                />
-              ) : (
-                progressBarWidth > 0 && (
-                  <Animated.View
-                    style={[
-                      styles.lockProgressBarIndeterminate,
+              {/* 上传进度条 */}
+              <View
+                style={[
+                  styles.lockProgressBarFill,
+                  {
+                    width: `${uploadProgress}%`,
+                    opacity: uploadProgress < 100 ? 1 : 0,
+                  },
+                ]}
+              />
+              {/* 不确定进度条（一直挂载，通过opacity控制显隐，避免条件渲染导致动画卡死） */}
+              <Animated.View
+                style={[
+                  styles.lockProgressBarIndeterminate,
+                  {
+                    opacity: uploadProgress >= 100 ? 1 : 0,
+                    transform: [
                       {
-                        transform: [
-                          {
-                            translateX: progressAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [
-                                -progressBarWidth * 0.4,
-                                progressBarWidth,
-                              ],
-                            }),
-                          },
-                        ],
+                        translateX: progressAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [
+                            -(progressBarWidth || 280) * 0.4,
+                            progressBarWidth || 280,
+                          ],
+                        }),
                       },
-                    ]}
-                  />
-                )
-              )}
+                    ],
+                  },
+                ]}
+              />
             </View>
             <Text style={styles.lockModalStatus}>
               {uploadProgress < 100 ? uploadLockStatus : "正在分析动作细节..."}
