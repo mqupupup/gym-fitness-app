@@ -1,6 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -15,7 +15,7 @@ const items = [
   },
   {
     title: "减肥 & 减脂",
-    subtitle: "计算每日热量消耗与减脂目标",
+    subtitle: "热量计算 + 饮食训练策略，科学减脂",
     icon: "flame-outline",
     route: "/weight-loss",
   },
@@ -43,11 +43,7 @@ export default function My() {
 
       <View style={styles.cardList}>
         {items.map((item) => (
-          <Link
-            key={item.title}
-            href={item.route || "#"}
-            asChild
-          >
+          <Link key={item.title} href={item.route || "#"} asChild>
             <Pressable
               style={styles.card}
               android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}

@@ -1,17 +1,20 @@
-import { Picker } from "@react-native-picker/picker";
 import { Stack } from "expo-router";
 import React, { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // 引入工具函数和组件
 import CustomModal from "../src/components/CustomModal";
@@ -35,6 +38,7 @@ const ACTIVITY_LEVELS = [
 ];
 
 const WeightLossScreen = () => {
+  const insets = useSafeAreaInsets();
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
@@ -44,6 +48,8 @@ const WeightLossScreen = () => {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
   const [isModalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [activityPickerVisible, setActivityPickerVisible] = useState(false);
 
   const calculate = () => {
     setError("");
@@ -90,24 +96,38 @@ const WeightLossScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: "减脂 & 减肥" }} />
-      {/* 配置原生 KeyboardAvoidingView */}
+
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"} // iOS用padding，Android用height
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20} // 针对 Android 稍微偏移一点
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
-          keyboardDismissMode="on-drag" // 拖动时收起键盘
-          keyboardShouldPersistTaps="handled" // 点击按钮不收起键盘
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.header}>身体数据计算器</Text>
+          {/* 顶部标题区 */}
+          <View style={styles.header}>
+            <View style={styles.headerIcon}>
+              <Ionicons name="flame" size={24} color="#6A4C93" />
+            </View>
+            <View style={styles.headerText}>
+              <Text style={styles.headerTitle}>身体数据计算器</Text>
+              <Text style={styles.headerSubtitle}>
+                热量计算 + 饮食训练策略，科学减脂
+              </Text>
+            </View>
+          </View>
 
-          {/* 性别选择 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>性别</Text>
+          {/* 输入卡片 */}
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>基本信息</Text>
+
+            {/* 性别选择 */}
+            <Text style={styles.inputLabel}>性别</Text>
             <View style={styles.genderContainer}>
-              <TouchableOpacity
+              <Pressable
                 style={[
                   styles.genderBtn,
                   gender === "male" && styles.genderBtnActive,
@@ -122,8 +142,8 @@ const WeightLossScreen = () => {
                 >
                   男
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 style={[
                   styles.genderBtn,
                   gender === "female" && styles.genderBtnActive,
@@ -138,91 +158,196 @@ const WeightLossScreen = () => {
                 >
                   女
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
-          </View>
 
-          {/* 基础输入 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>年龄 (岁)</Text>
-            <TextInput
-              style={styles.input}
-              value={age}
-              onChangeText={setAge}
-              placeholder="例如: 25"
-              keyboardType="numeric"
-              maxLength={3}
-            />
-          </View>
+            <View style={{ height: 14 }} />
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>身高 (cm)</Text>
-            <TextInput
-              style={styles.input}
-              value={height}
-              onChangeText={setHeight}
-              placeholder="例如: 175"
-              keyboardType="numeric"
-              maxLength={6}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>体重 (kg)</Text>
-            <TextInput
-              style={styles.input}
-              value={weight}
-              onChangeText={setWeight}
-              placeholder="例如: 70"
-              keyboardType="numeric"
-              maxLength={6}
-            />
-          </View>
-
-          {/* 活动量选择 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>活动水平</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={activity}
-                onValueChange={(itemValue) => setActivity(itemValue)}
-                dropdownIconColor="#007AFF"
-              >
-                {ACTIVITY_LEVELS.map((item) => (
-                  <Picker.Item
-                    key={item.value}
-                    label={item.label}
-                    value={item.value}
-                  />
-                ))}
-              </Picker>
+            {/* 年龄 */}
+            <Text style={styles.inputLabel}>年龄</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={age}
+                onChangeText={setAge}
+                placeholder="请输入年龄"
+                placeholderTextColor="#C7C7CC"
+                keyboardType="numeric"
+                maxLength={3}
+              />
+              <Text style={styles.unitText}>岁</Text>
             </View>
-          </View>
 
-          {/* 计算按钮 */}
-          <TouchableOpacity style={styles.submitButton} onPress={calculate}>
-            <Text style={styles.submitButtonText}>开始计算</Text>
-          </TouchableOpacity>
+            <View style={{ height: 14 }} />
+
+            {/* 身高 */}
+            <Text style={styles.inputLabel}>身高</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={height}
+                onChangeText={setHeight}
+                placeholder="请输入身高"
+                placeholderTextColor="#C7C7CC"
+                keyboardType="numeric"
+                maxLength={6}
+              />
+              <Text style={styles.unitText}>cm</Text>
+            </View>
+
+            <View style={{ height: 14 }} />
+
+            {/* 体重 */}
+            <Text style={styles.inputLabel}>体重</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={weight}
+                onChangeText={setWeight}
+                placeholder="请输入体重"
+                placeholderTextColor="#C7C7CC"
+                keyboardType="numeric"
+                maxLength={6}
+              />
+              <Text style={styles.unitText}>kg</Text>
+            </View>
+
+            <View style={{ height: 14 }} />
+
+            {/* 活动水平 */}
+            <Text style={styles.inputLabel}>活动水平</Text>
+            <Pressable
+              style={styles.pickerTrigger}
+              onPress={() => setActivityPickerVisible(true)}
+              android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
+            >
+              <Text style={styles.pickerTriggerText} numberOfLines={1}>
+                {ACTIVITY_LEVELS.find((item) => item.value === activity)?.label ||
+                  "请选择活动水平"}
+              </Text>
+              <Ionicons name="chevron-down" size={18} color="#8E8E93" />
+            </Pressable>
+          </View>
 
           {/* 策略列表 */}
           <StrategiesList />
 
-          {/*  关键：增加底部留白，防止最后一个输入框贴底 */}
           <View style={{ height: 100 }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* 底部按钮（放在 KeyboardAvoidingView 外面，位置固定不受键盘影响） */}
+      <View
+        style={[
+          styles.footer,
+          { paddingBottom: Math.max(insets.bottom, 12) + 12 },
+        ]}
+      >
+        <Pressable
+          style={({ pressed }) => [
+            styles.submitButton,
+            pressed && styles.submitButtonPressed,
+          ]}
+          onPress={calculate}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <Text style={styles.submitButtonText}>开始计算</Text>
+          )}
+        </Pressable>
+      </View>
+
+      {/* 活动水平选择器（底部 ActionSheet 风格） */}
+      <Modal
+        visible={activityPickerVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setActivityPickerVisible(false)}
+      >
+        <Pressable
+          style={pickerStyles.overlay}
+          onPress={() => setActivityPickerVisible(false)}
+        >
+          <Pressable style={pickerStyles.sheet}>
+            <View style={pickerStyles.handle} />
+            <Text style={pickerStyles.sheetTitle}>选择活动水平</Text>
+            {ACTIVITY_LEVELS.map((item, index) => {
+              const isSelected = item.value === activity;
+              return (
+                <Pressable
+                  key={item.value}
+                  style={[
+                    pickerStyles.option,
+                    index === ACTIVITY_LEVELS.length - 1 && pickerStyles.optionLast,
+                  ]}
+                  onPress={() => {
+                    setActivity(item.value);
+                    setActivityPickerVisible(false);
+                  }}
+                  android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
+                >
+                  <Text
+                    style={[
+                      pickerStyles.optionText,
+                      isSelected && pickerStyles.optionTextSelected,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {item.label}
+                  </Text>
+                  {isSelected && (
+                    <Ionicons name="checkmark" size={20} color="#6A4C93" />
+                  )}
+                </Pressable>
+              );
+            })}
+            <Pressable
+              style={pickerStyles.cancelBtn}
+              onPress={() => setActivityPickerVisible(false)}
+            >
+              <Text style={pickerStyles.cancelText}>取消</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* 使用自定义 Modal 组件 */}
       <CustomModal
         visible={isModalVisible}
         onClose={() => setModalVisible(false)}
         title={result ? "计算结果" : "提示"}
-        message={
-          result
-            ? `基础代谢: ${result.bmr} 大卡\n\n每日总消耗: ${result.tdee} 大卡\n\n建议减脂摄入: ${result.target} 大卡`
-            : error || "信息不完整"
-        }
-      />
+        icon={result ? "calculator-outline" : "alert-circle-outline"}
+        message={result ? undefined : error || "信息不完整"}
+      >
+        {result && (
+          <View style={resultModalStyles.container}>
+            <View style={resultModalStyles.row}>
+              <View style={resultModalStyles.item}>
+                <Text style={resultModalStyles.value}>{result.bmr}</Text>
+                <Text style={resultModalStyles.label}>基础代谢</Text>
+                <Text style={resultModalStyles.unit}>大卡/天</Text>
+              </View>
+              <View style={resultModalStyles.divider} />
+              <View style={resultModalStyles.item}>
+                <Text style={resultModalStyles.value}>{result.tdee}</Text>
+                <Text style={resultModalStyles.label}>每日总消耗</Text>
+                <Text style={resultModalStyles.unit}>大卡/天</Text>
+              </View>
+            </View>
+            <View style={resultModalStyles.targetCard}>
+              <Text style={resultModalStyles.targetLabel}>建议减脂摄入</Text>
+              <Text style={resultModalStyles.targetValue}>
+                {result.target}
+                <Text style={resultModalStyles.targetUnit}> 大卡/天</Text>
+              </Text>
+              <Text style={resultModalStyles.targetHint}>
+                每日热量缺口约 350 大卡，温和减脂
+              </Text>
+            </View>
+          </View>
+        )}
+      </CustomModal>
     </SafeAreaView>
   );
 };
@@ -230,91 +355,308 @@ const WeightLossScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: "#F7F6FA",
   },
   scrollContent: {
     padding: 20,
     paddingTop: 20,
   },
+
+  // 顶部标题区
   header: {
-    fontSize: 28,
-    fontWeight: "bold",
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
+    gap: 14,
+  },
+  headerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#F3F0FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerText: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "700",
     color: "#1C1C1E",
-    marginBottom: 30,
-    textAlign: "center",
+    marginBottom: 2,
+    letterSpacing: -0.3,
   },
-  inputGroup: {
-    marginBottom: 20,
+  headerSubtitle: {
+    fontSize: 13,
+    color: "#8E8E93",
+    lineHeight: 18,
+    fontWeight: "400",
   },
-  label: {
-    fontSize: 16,
+
+  // 区域卡片
+  sectionCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1C1C1E",
+    marginBottom: 16,
+    letterSpacing: -0.2,
+  },
+
+  // 输入标签
+  inputLabel: {
+    fontSize: 14,
     fontWeight: "600",
     color: "#3C3C43",
     marginBottom: 8,
   },
-  input: {
-    backgroundColor: "#FFFFFF",
+
+  // 输入框容器
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F7F7F8",
     borderRadius: 12,
-    padding: 15,
-    fontSize: 16,
-    color: "#1C1C1E",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#EDEDF0",
+    overflow: "hidden",
   },
+  input: {
+    flex: 1,
+    height: 50,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#1C1C1E",
+  },
+  unitText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#8E8E93",
+    paddingHorizontal: 16,
+  },
+
+  // 性别选择
   genderContainer: {
     flexDirection: "row",
-    gap: 15,
+    gap: 12,
   },
   genderBtn: {
     flex: 1,
-    padding: 15,
+    paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FAFAFA",
     alignItems: "center",
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: "#E5E5EA",
   },
   genderBtnActive: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
+    backgroundColor: "#F3F0FF",
+    borderColor: "#6A4C93",
   },
   genderText: {
     fontSize: 16,
-    color: "#3C3C43",
+    color: "#8E8E93",
     fontWeight: "600",
   },
   genderTextActive: {
-    color: "#FFFFFF",
+    color: "#6A4C93",
   },
-  pickerContainer: {
-    backgroundColor: "#FFFFFF",
+
+  // 活动水平选择器触发按钮
+  pickerTrigger: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#F7F7F8",
     borderRadius: 12,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#EDEDF0",
+    paddingHorizontal: 16,
+    height: 50,
+  },
+  pickerTriggerText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#1C1C1E",
+    marginRight: 12,
+  },
+
+  // 底部按钮
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 36,
+    backgroundColor: "#F7F6FA",
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E5",
   },
   submitButton: {
-    backgroundColor: "#007AFF",
-    padding: 18,
-    borderRadius: 12,
+    backgroundColor: "#6A4C93",
+    borderRadius: 14,
+    paddingVertical: 16,
     alignItems: "center",
-    marginTop: 20,
-    shadowColor: "#007AFF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  submitButtonPressed: {
+    backgroundColor: "#5A3D80",
+    transform: [{ scale: 0.98 }],
   },
   submitButtonText: {
     color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "600",
+    letterSpacing: 0.3,
+  },
+});
+
+// 计算结果弹窗的结构化样式
+const resultModalStyles = StyleSheet.create({
+  container: {
+    width: "100%",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F7F6FA",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  item: {
+    flex: 1,
+    alignItems: "center",
+  },
+  divider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "#E0E0E5",
+  },
+  value: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#6A4C93",
+    marginBottom: 4,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1C1C1E",
+    marginBottom: 2,
+  },
+  unit: {
+    fontSize: 11,
+    color: "#8E8E93",
+  },
+  targetCard: {
+    backgroundColor: "#F3F0FF",
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+  },
+  targetLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#6A4C93",
+    marginBottom: 6,
+  },
+  targetValue: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#6A4C93",
+    marginBottom: 6,
+  },
+  targetUnit: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  targetHint: {
+    fontSize: 12,
+    color: "#8E8E93",
+    textAlign: "center",
+  },
+});
+
+// 活动水平选择器（底部 ActionSheet 风格）
+const pickerStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: Math.max(12, 0) + 16,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#E0E0E5",
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  sheetTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#8E8E93",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  option: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F3",
+  },
+  optionLast: {
+    borderBottomWidth: 0,
+  },
+  optionText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#1C1C1E",
+    fontWeight: "500",
+    marginRight: 12,
+  },
+  optionTextSelected: {
+    color: "#6A4C93",
+    fontWeight: "600",
+  },
+  cancelBtn: {
+    marginTop: 8,
+    paddingVertical: 16,
+    alignItems: "center",
+    backgroundColor: "#F7F6FA",
+    borderRadius: 12,
+  },
+  cancelText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#6A4C93",
   },
 });
 
