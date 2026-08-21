@@ -8,6 +8,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
+  Dimensions,
   Image,
   Modal,
   SafeAreaView,
@@ -43,20 +44,7 @@ export default function ExercisesScreen() {
   const insets = useSafeAreaInsets();
   const supportExercisesText = SUPPORTED_EXERCISES.join(" · ");
 
-  // 分析中不确定进度条的滑动动画（用原生驱动，避免JS线程阻塞导致卡死）
-  const progressAnim = useRef(new Animated.Value(0)).current;
-  const [progressBarWidth, setProgressBarWidth] = useState(0);
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.timing(progressAnim, {
-        toValue: 1,
-        duration: 2000,
-        useNativeDriver: true,
-      }),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [progressAnim]);
+
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
@@ -291,13 +279,7 @@ export default function ExercisesScreen() {
             <Text style={styles.lockModalTitle}>
               {uploadProgress < 100 ? "上传视频" : "AI 分析中"}
             </Text>
-            <View
-              style={styles.lockProgressBarBg}
-              onLayout={(e) => {
-                const w = e.nativeEvent.layout.width;
-                setProgressBarWidth((prev) => (prev === w ? prev : w));
-              }}
-            >
+            <View style={styles.lockProgressBarBg}>
               {/* 上传进度条 */}
               <View
                 style={[
@@ -308,26 +290,8 @@ export default function ExercisesScreen() {
                   },
                 ]}
               />
-              {/* 不确定进度条（一直挂载，通过opacity控制显隐，避免条件渲染导致动画卡死） */}
-              <Animated.View
-                style={[
-                  styles.lockProgressBarIndeterminate,
-                  {
-                    opacity: uploadProgress >= 100 ? 1 : 0,
-                    transform: [
-                      {
-                        translateX: progressAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [
-                            -(progressBarWidth || 280) * 0.4,
-                            progressBarWidth || 280,
-                          ],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              />
+              {/* 不确定进度条（独立memo组件，不受父组件重渲染影响，避免动画卡死） */}
+              <IndeterminateBar visible={uploadProgress >= 100} />
             </View>
             <Text style={styles.lockModalStatus}>
               {uploadProgress < 100 ? uploadLockStatus : "正在分析动作细节..."}
@@ -343,3 +307,55 @@ export default function ExercisesScreen() {
     </SafeAreaView>
   );
 }
+
+/**
+ * 不确定进度条（独立 memo 组件）
+ * 关键：用 React.memo 包裹，只有 visible 变化时才重渲染，
+ * 完全不受父组件 uploadProgress 频繁变化的影响，
+ * 避免 Animated.View 频繁重渲染导致原生动画重新配置卡死。
+ */
+const IndeterminateBar = React.memo(function IndeterminateBar({
+  visible,
+}: {
+  visible: boolean;
+}) {
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  // 固定宽度，避免动态 outputRange
+  const screenW = Dimensions.get("window").width;
+  const modalW = Math.min(screenW * 0.82, 340);
+  const barBgW = modalW - 64;
+  const barW = barBgW * 0.4;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(progressAnim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+        easing: (t) => t,
+      }),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [progressAnim]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.lockProgressBarIndeterminate,
+        {
+          opacity: visible ? 1 : 0,
+          transform: [
+            {
+              translateX: progressAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-barW, barBgW],
+              }),
+            },
+          ],
+        },
+      ]}
+    />
+  );
+});
