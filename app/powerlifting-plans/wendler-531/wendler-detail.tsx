@@ -1,13 +1,15 @@
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
-import { useLayoutEffect } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useLayoutEffect, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function WendlerDetail() {
   const { planData } = useLocalSearchParams();
   const navigation = useNavigation();
+  const [selectedCycle, setSelectedCycle] = useState(1);
+  const [selectedDay, setSelectedDay] = useState(0);
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: "Wendler 训练计划" });
@@ -101,7 +103,7 @@ export default function WendlerDetail() {
     );
   };
 
-  const renderCycle = (cycle: number) => {
+  const renderCycleDay = (cycle: number, dayIndex: number) => {
     const lifts = data.lifts;
     const progression = data.progression;
     const bbbPct = data.bbbPercentage;
@@ -127,73 +129,46 @@ export default function WendlerDetail() {
       { key: "week4", label: "第4周", type: "减载周" },
     ];
 
+    const trainingDay = trainingDays[dayIndex];
+    const exerciseKey = trainingDay.key as keyof typeof weightsMap;
+    const weights = weightsMap[exerciseKey];
+    const bbbWeight = bbbMap[exerciseKey];
+
     return (
-      <View key={cycle} style={styles.cycleCard}>
-        <View style={styles.cycleHeader}>
-          <View style={styles.cycleBadge}>
-            <Text style={styles.cycleBadgeText}>周期 {cycle}</Text>
-          </View>
-          <Text style={styles.cycleTitle}>4 周训练安排</Text>
+      <View style={styles.exerciseCard}>
+        <View style={styles.dayHeader}>
+          <Text style={styles.dayText}>{trainingDay.day}</Text>
+          <Text style={styles.exerciseText}>{trainingDay.exercise}</Text>
         </View>
 
-        {/* 训练频率 */}
-        <View style={styles.scheduleCard}>
-          <View style={styles.scheduleHeader}>
-            <Ionicons name="calendar-outline" size={16} color="#6A4C93" />
-            <Text style={styles.scheduleTitle}>训练频率</Text>
-          </View>
-          {trainingDays.map((d, i) => (
-            <Text key={i} style={styles.scheduleText}>
-              {d.day}：{d.exercise}日
-            </Text>
-          ))}
-          <Text style={styles.scheduleNote}>每周训练4天，周二、周六、周日休息</Text>
-        </View>
-
-        {/* 按训练日展示 */}
-        {trainingDays.map((trainingDay, dayIndex) => {
-          const exerciseKey = trainingDay.key as keyof typeof weightsMap;
-          const weights = weightsMap[exerciseKey];
-          const bbbWeight = bbbMap[exerciseKey];
-
-          return (
-            <View key={dayIndex} style={styles.exerciseCard}>
-              <View style={styles.dayHeader}>
-                <Text style={styles.dayText}>{trainingDay.day}</Text>
-                <Text style={styles.exerciseText}>{trainingDay.exercise}</Text>
+        {weekLabels.map((week, wi) => (
+          <View key={wi} style={styles.weekCard}>
+            <View style={styles.weekHeader}>
+              <Text style={styles.weekLabel}>{week.label}</Text>
+              <View style={[
+                styles.weekTypeBadge,
+                week.type === "PR周" && styles.weekTypePR,
+                week.type === "减载周" && styles.weekTypeDeload,
+              ]}>
+                <Text style={[
+                  styles.weekTypeText,
+                  week.type === "PR周" && styles.weekTypeTextPR,
+                  week.type === "减载周" && styles.weekTypeTextDeload,
+                ]}>{week.type}</Text>
               </View>
-
-              {weekLabels.map((week, wi) => (
-                <View key={wi} style={styles.weekCard}>
-                  <View style={styles.weekHeader}>
-                    <Text style={styles.weekLabel}>{week.label}</Text>
-                    <View style={[
-                      styles.weekTypeBadge,
-                      week.type === "PR周" && styles.weekTypePR,
-                      week.type === "减载周" && styles.weekTypeDeload,
-                    ]}>
-                      <Text style={[
-                        styles.weekTypeText,
-                        week.type === "PR周" && styles.weekTypeTextPR,
-                        week.type === "减载周" && styles.weekTypeTextDeload,
-                      ]}>{week.type}</Text>
-                    </View>
-                  </View>
-                  {renderSets(
-                    (weights as any)[week.key],
-                    wi,
-                  )}
-                  <View style={styles.bbbRow}>
-                    <Text style={styles.bbbLabel}>辅助训练</Text>
-                    <Text style={styles.bbbValue}>
-                      {bbbWeight.toFixed(1)} kg × {week.type === "减载周" ? "3" : "5"}组×10次
-                    </Text>
-                  </View>
-                </View>
-              ))}
             </View>
-          );
-        })}
+            {renderSets(
+              (weights as any)[week.key],
+              wi,
+            )}
+            <View style={styles.bbbRow}>
+              <Text style={styles.bbbLabel}>辅助训练</Text>
+              <Text style={styles.bbbValue}>
+                {bbbWeight.toFixed(1)} kg × {week.type === "减载周" ? "3" : "5"}组×10次
+              </Text>
+            </View>
+          </View>
+        ))}
       </View>
     );
   };
@@ -269,9 +244,74 @@ export default function WendlerDetail() {
           </View>
         </View>
 
-        {/* 训练计划 */}
-        {renderCycle(1)}
-        {renderCycle(2)}
+        {/* 训练频率 */}
+        <View style={styles.scheduleCard}>
+          <View style={styles.scheduleHeader}>
+            <Ionicons name="calendar-outline" size={16} color="#6A4C93" />
+            <Text style={styles.scheduleTitle}>训练频率</Text>
+          </View>
+          {trainingDays.map((d, i) => (
+            <Text key={i} style={styles.scheduleText}>
+              {d.day}：{d.exercise}日
+            </Text>
+          ))}
+          <Text style={styles.scheduleNote}>每周训练4天，周二、周六、周日休息</Text>
+        </View>
+
+        {/* 周期选择 */}
+        <View style={styles.tabSection}>
+          <Text style={styles.tabSectionTitle}>选择周期</Text>
+          <View style={styles.tabRow}>
+            {[1, 2, 3, 4].map((cycle) => (
+              <Pressable
+                key={cycle}
+                style={[
+                  styles.tabButton,
+                  selectedCycle === cycle && styles.tabButtonActive,
+                ]}
+                onPress={() => setSelectedCycle(cycle)}
+              >
+                <Text style={[
+                  styles.tabButtonText,
+                  selectedCycle === cycle && styles.tabButtonTextActive,
+                ]}>周期{cycle}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        {/* 训练日选择 */}
+        <View style={styles.tabSection}>
+          <Text style={styles.tabSectionTitle}>选择训练日</Text>
+          <View style={styles.tabRow}>
+            {trainingDays.map((d, i) => (
+              <Pressable
+                key={i}
+                style={[
+                  styles.tabButton,
+                  selectedDay === i && styles.tabButtonActive,
+                ]}
+                onPress={() => setSelectedDay(i)}
+              >
+                <Text style={[
+                  styles.tabButtonText,
+                  selectedDay === i && styles.tabButtonTextActive,
+                ]}>{d.exercise}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        {/* 当前周期+训练日的训练安排 */}
+        <View style={styles.cycleCard}>
+          <View style={styles.cycleHeader}>
+            <View style={styles.cycleBadge}>
+              <Text style={styles.cycleBadgeText}>周期 {selectedCycle}</Text>
+            </View>
+            <Text style={styles.cycleTitle}>{trainingDays[selectedDay].day} · {trainingDays[selectedDay].exercise}</Text>
+          </View>
+          {renderCycleDay(selectedCycle, selectedDay)}
+        </View>
 
         {/* 底部提示 */}
         <View style={styles.tipCard}>
@@ -415,6 +455,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
+  },
+
+  // Tab 选择器
+  tabSection: {
+    marginBottom: 14,
+  },
+  tabSectionTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#8E8E93",
+    marginBottom: 8,
+    marginLeft: 2,
+  },
+  tabRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E8E8ED",
+  },
+  tabButtonActive: {
+    backgroundColor: "#6A4C93",
+    borderColor: "#6A4C93",
+  },
+  tabButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#3C3C43",
+  },
+  tabButtonTextActive: {
+    color: "#FFFFFF",
   },
   cycleHeader: {
     flexDirection: "row",
