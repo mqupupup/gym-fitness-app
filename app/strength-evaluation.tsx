@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -41,6 +42,12 @@ interface AssessmentResult {
 
 type Gender = "male" | "female";
 
+const EXERCISE_NAME_MAP: Record<string, string> = {
+  bench_press: "卧推",
+  squat: "深蹲",
+  deadlift: "硬拉",
+};
+
 export default function StrengthEvaluation() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -55,7 +62,7 @@ export default function StrengthEvaluation() {
   const [error, setError] = useState<string | null>(null);
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: "💪 力量水平评估" });
+    navigation.setOptions({ title: "力量水平评估" });
   }, [navigation]);
 
   useEffect(() => {
@@ -132,17 +139,15 @@ export default function StrengthEvaluation() {
   // 等级颜色函数
   const getLevelColor = (level: string) => {
     const colors: Record<string, string> = {
-      // 英文映射
       beginner: "#FF9500",
       novice: "#FFCC00",
       intermediate: "#5AC8FA",
-      advanced: "#4CD964",
+      advanced: "#34C759",
       elite: "#FF2D55",
-      // 中文映射
       初级: "#FF9500",
       入门: "#FFCC00",
       中级: "#5AC8FA",
-      高级: "#4CD964",
+      高级: "#34C759",
       精英: "#FF2D55",
     };
     return colors[level] || "#8E8E93";
@@ -156,7 +161,6 @@ export default function StrengthEvaluation() {
       advanced: "高级",
       elite: "精英",
     };
-    // 如果是英文，转换为中文；如果是中文，直接返回
     return names[level] || level;
   };
 
@@ -174,128 +178,127 @@ export default function StrengthEvaluation() {
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets={true}
         >
-          {/* 顶部标题卡片 */}
-          <View style={styles.headerCard}>
-            <Text style={styles.headerTitle}>🏋️‍♂️ 力量评估</Text>
-            <Text style={styles.headerSubtitle}>
-              输入您的基础数据，获得专业的力量水平分析
-            </Text>
+          {/* 顶部标题区 */}
+          <View style={styles.header}>
+            <View style={styles.headerIcon}>
+              <Ionicons name="barbell" size={24} color="#6A4C93" />
+            </View>
+            <View style={styles.headerText}>
+              <Text style={styles.headerTitle}>力量水平评估</Text>
+              <Text style={styles.headerSubtitle}>
+                输入基础数据，获得专业力量等级分析
+              </Text>
+            </View>
           </View>
 
-          {/* 性别选择 */}
+          {/* 基本信息 */}
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>基本信息</Text>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>性别</Text>
-              <View style={styles.genderGroup}>
-                <Pressable
+
+            <Text style={styles.inputLabel}>性别</Text>
+            <View style={styles.genderGroup}>
+              <Pressable
+                style={[
+                  styles.genderButton,
+                  gender === "male" && styles.genderButtonActive,
+                ]}
+                onPress={() => setGender("male")}
+              >
+                <Text
                   style={[
-                    styles.genderButton,
-                    gender === "male" && styles.genderButtonActive,
+                    styles.genderText,
+                    gender === "male" && styles.genderTextActive,
                   ]}
-                  onPress={() => setGender("male")}
                 >
-                  <Text
-                    style={[
-                      styles.genderText,
-                      gender === "male" && styles.genderTextActive,
-                    ]}
-                  >
-                    👨 男
-                  </Text>
-                </Pressable>
-                <Pressable
+                  男
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.genderButton,
+                  gender === "female" && styles.genderButtonActive,
+                ]}
+                onPress={() => setGender("female")}
+              >
+                <Text
                   style={[
-                    styles.genderButton,
-                    gender === "female" && styles.genderButtonActive,
+                    styles.genderText,
+                    gender === "female" && styles.genderTextActive,
                   ]}
-                  onPress={() => setGender("female")}
                 >
-                  <Text
-                    style={[
-                      styles.genderText,
-                      gender === "female" && styles.genderTextActive,
-                    ]}
-                  >
-                    👩 女
-                  </Text>
-                </Pressable>
-              </View>
+                  女
+                </Text>
+              </Pressable>
+            </View>
+
+            <View style={{ height: 16 }} />
+
+            <Text style={styles.inputLabel}>体重</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={weight}
+                onChangeText={setWeight}
+                placeholder="请输入体重"
+                placeholderTextColor="#C7C7CC"
+                keyboardType="numeric"
+              />
+              <Text style={styles.unitText}>kg</Text>
             </View>
           </View>
 
-          {/* 体重输入 */}
-          <View style={styles.sectionCard}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>⚖️ 体重</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={weight}
-                  onChangeText={setWeight}
-                  placeholder="请输入体重"
-                  placeholderTextColor="#A0A0A5"
-                  keyboardType="numeric"
-                />
-                <Text style={styles.unitText}>kg</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 三大项输入 */}
+          {/* 三大项极限重量 */}
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>三大项极限重量</Text>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Bench Press 💪</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={bench}
-                  onChangeText={setBench}
-                  placeholder="卧推"
-                  placeholderTextColor="#A0A0A5"
-                  keyboardType="numeric"
-                />
-                <Text style={styles.unitText}>kg</Text>
-              </View>
+            <Text style={styles.inputLabel}>卧推</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={bench}
+                onChangeText={setBench}
+                placeholder="请输入卧推 1RM"
+                placeholderTextColor="#C7C7CC"
+                keyboardType="numeric"
+              />
+              <Text style={styles.unitText}>kg</Text>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Squat 🦵</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={squat}
-                  onChangeText={setSquat}
-                  placeholder="深蹲"
-                  placeholderTextColor="#A0A0A5"
-                  keyboardType="numeric"
-                />
-                <Text style={styles.unitText}>kg</Text>
-              </View>
+            <View style={{ height: 14 }} />
+
+            <Text style={styles.inputLabel}>深蹲</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={squat}
+                onChangeText={setSquat}
+                placeholder="请输入深蹲 1RM"
+                placeholderTextColor="#C7C7CC"
+                keyboardType="numeric"
+              />
+              <Text style={styles.unitText}>kg</Text>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Deadlift 🏋️</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={deadlift}
-                  onChangeText={setDeadlift}
-                  placeholder="硬拉"
-                  placeholderTextColor="#A0A0A5"
-                  keyboardType="numeric"
-                />
-                <Text style={styles.unitText}>kg</Text>
-              </View>
+            <View style={{ height: 14 }} />
+
+            <Text style={styles.inputLabel}>硬拉</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={deadlift}
+                onChangeText={setDeadlift}
+                placeholder="请输入硬拉 1RM"
+                placeholderTextColor="#C7C7CC"
+                keyboardType="numeric"
+              />
+              <Text style={styles.unitText}>kg</Text>
             </View>
           </View>
 
           {/* 错误提示 */}
           {error ? (
             <View style={styles.errorCard}>
-              <Text style={styles.errorIcon}>⚠️</Text>
+              <Ionicons name="alert-circle" size={20} color="#FF3B30" />
               <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
@@ -303,24 +306,18 @@ export default function StrengthEvaluation() {
           {/* 评估结果 */}
           {result ? (
             <View style={styles.resultCard}>
-              <Text style={styles.resultTitle}>📊 评估结果</Text>
+              <Text style={styles.resultTitle}>评估结果</Text>
 
               {result.assessments.map((item) => {
                 const levelColor = getLevelColor(item.level);
                 const levelName = getLevelName(item.level);
+                const exerciseName =
+                  EXERCISE_NAME_MAP[item.exercise] || item.exercise;
 
                 return (
                   <View key={item.exercise} style={styles.resultItem}>
                     <View style={styles.resultHeader}>
-                      <Text style={styles.resultExercise}>
-                        {item.exercise === "bench_press"
-                          ? "Bench Press 💪"
-                          : item.exercise === "squat"
-                            ? "Squat 🦵"
-                            : item.exercise === "deadlift"
-                              ? "Deadlift 🏋️"
-                              : item.exercise}
-                      </Text>
+                      <Text style={styles.resultExercise}>{exerciseName}</Text>
                       <View
                         style={[
                           styles.levelBadge,
@@ -336,6 +333,7 @@ export default function StrengthEvaluation() {
                         <Text style={styles.statLabel}>1RM</Text>
                         <Text style={styles.statValue}>{item.oneRepMax}kg</Text>
                       </View>
+                      <View style={styles.statDivider} />
                       <View style={styles.statItem}>
                         <Text style={styles.statLabel}>体重比</Text>
                         <Text style={styles.statValue}>
@@ -344,18 +342,21 @@ export default function StrengthEvaluation() {
                       </View>
                     </View>
 
-                    {/* 进度条展示等级位置 */}
                     <View style={styles.progressBarContainer}>
                       <View
                         style={[
                           styles.progressBar,
                           {
-                            width: `${
-                              ((item.oneRepMax - item.standard.beginner) /
-                                (item.standard.elite -
-                                  item.standard.beginner)) *
-                              100
-                            }%`,
+                            width: `${Math.min(
+                              100,
+                              Math.max(
+                                0,
+                                ((item.oneRepMax - item.standard.beginner) /
+                                  (item.standard.elite -
+                                    item.standard.beginner)) *
+                                  100,
+                              ),
+                            )}%`,
                             backgroundColor: levelColor,
                           },
                         ]}
@@ -367,35 +368,35 @@ export default function StrengthEvaluation() {
             </View>
           ) : null}
         </ScrollView>
-
-        {/* 底部按钮 */}
-        <View
-          style={[
-            styles.footer,
-            { paddingBottom: Math.max(insets.bottom, 24) + 16 },
-          ]}
-        >
-          <Pressable
-            style={({ pressed }) => [
-              styles.submitButton,
-              pressed && styles.submitButtonPressed,
-            ]}
-            onPress={
-              result
-                ? () => scrollViewRef.current?.scrollToEnd()
-                : handleEvaluate
-            }
-          >
-            {loading ? (
-              <ActivityIndicator color="#ffffff" size="small" />
-            ) : (
-              <Text style={styles.submitText}>
-                {result ? "👇 向下滑动查看完整结果" : "🚀 开始评估"}
-              </Text>
-            )}
-          </Pressable>
-        </View>
       </KeyboardAvoidingView>
+
+      {/* 底部按钮（放在 KeyboardAvoidingView 外面，位置固定不受键盘弹起影响） */}
+      <View
+        style={[
+          styles.footer,
+          { paddingBottom: Math.max(insets.bottom, 12) + 12 },
+        ]}
+      >
+        <Pressable
+          style={({ pressed }) => [
+            styles.submitButton,
+            pressed && styles.submitButtonPressed,
+          ]}
+          onPress={
+            result
+              ? () => scrollViewRef.current?.scrollToEnd()
+              : handleEvaluate
+          }
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <Text style={styles.submitText}>
+              {result ? "查看完整结果" : "开始评估"}
+            </Text>
+          )}
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
