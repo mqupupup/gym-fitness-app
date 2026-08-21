@@ -1,16 +1,17 @@
-import { useRouter } from "expo-router";
-import React from "react";
-import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import { useLayoutEffect } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function GZCLPIndex() {
   const router = useRouter();
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: "GZCLP" });
+  }, [navigation]);
 
   const weeks = [
     { number: 1, description: "基础适应周" },
@@ -19,7 +20,12 @@ export default function GZCLPIndex() {
     { number: 4, description: "峰值周" },
   ];
 
-  // 导航到训练日（使用动态路由）
+  const dayInfo: Record<number, { label: string; moves: string }> = {
+    1: { label: "A", moves: "深蹲 · 卧推 · 划船" },
+    2: { label: "B", moves: "深蹲 · 硬拉 · 推举" },
+    3: { label: "A+", moves: "深蹲 · 卧推 · 划船" },
+  };
+
   const handleDayPress = (weekNumber: number, dayNumber: number) => {
     router.push({
       pathname: `/powerlifting-plans/gzclp/[week]/[day]`,
@@ -32,95 +38,103 @@ export default function GZCLPIndex() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Stack.Screen options={{ title: "GZCLP" }} />
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        {/* Header - 美化版 */}
+        {/* 顶部标题区 */}
         <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.headerEmoji}>💪</Text>
-            <View style={styles.titleWrapper}>
-              <Text style={styles.headerTitle}>GZCLP 计划</Text>
-              <Text style={styles.headerSubtitle}>12 周力量训练计划</Text>
-            </View>
+          <View style={styles.headerIcon}>
+            <Ionicons name="stats-chart-outline" size={24} color="#6A4C93" />
           </View>
-
-          <View style={styles.headerDivider} />
-
-          <View style={styles.headerStats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>12</Text>
-              <Text style={styles.statLabel}>周数</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>3</Text>
-              <Text style={styles.statLabel}>训练日/周</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>3</Text>
-              <Text style={styles.statLabel}>主要动作</Text>
-            </View>
+          <View style={styles.headerText}>
+            <Text style={styles.headerTitle}>GZCLP</Text>
+            <Text style={styles.headerSubtitle}>系统化渐进超负荷，适合自学者的 12 周计划</Text>
           </View>
-
-          <TouchableOpacity
-            style={styles.calculatorButton}
-            onPress={() => router.push("/powerlifting-plans/gzclp/calculator")}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.calculatorButtonText}>📱 计算器</Text>
-            <Text style={styles.calculatorButtonSubtext}>计算训练重量</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Weeks List */}
-        <View style={styles.weeksContainer}>
-          {weeks.map((week) => (
-            <View key={week.number} style={styles.weekCard}>
-              <View style={styles.weekHeader}>
-                <View style={styles.weekBadge}>
-                  <Text style={styles.weekBadgeText}>WEEK {week.number}</Text>
-                </View>
-                <Text style={styles.weekDescription}>{week.description}</Text>
-              </View>
+        {/* 计划数据统计卡片 */}
+        <View style={styles.statsCard}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statLabel}>周数</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>3</Text>
+            <Text style={styles.statLabel}>训练日/周</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>3</Text>
+            <Text style={styles.statLabel}>主要动作</Text>
+          </View>
+        </View>
 
-              <View style={styles.daysContainer}>
-                {[1, 2, 3].map((day) => (
-                  <TouchableOpacity
+        {/* 计算器入口 */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.calculatorCard,
+            pressed && styles.calculatorCardPressed,
+          ]}
+          onPress={() => router.push("/powerlifting-plans/gzclp/calculator")}
+          android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
+        >
+          <View style={styles.calculatorIcon}>
+            <Ionicons name="calculator-outline" size={22} color="#6A4C93" />
+          </View>
+          <View style={styles.calculatorContent}>
+            <Text style={styles.calculatorTitle}>训练重量计算器</Text>
+            <Text style={styles.calculatorSubtitle}>输入 1RM，自动计算各周训练重量</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#C7C7CC" />
+        </Pressable>
+
+        {/* 周计划列表 */}
+        <Text style={styles.sectionTitle}>训练周计划</Text>
+        {weeks.map((week) => (
+          <View key={week.number} style={styles.weekCard}>
+            <View style={styles.weekHeader}>
+              <View style={styles.weekBadge}>
+                <Text style={styles.weekBadgeText}>WEEK {week.number}</Text>
+              </View>
+              <Text style={styles.weekDescription}>{week.description}</Text>
+            </View>
+
+            <View style={styles.daysContainer}>
+              {[1, 2, 3].map((day) => {
+                const info = dayInfo[day];
+                return (
+                  <Pressable
                     key={day}
-                    style={styles.dayButton}
+                    style={({ pressed }) => [
+                      styles.dayButton,
+                      pressed && styles.dayButtonPressed,
+                    ]}
                     onPress={() => handleDayPress(week.number, day)}
-                    activeOpacity={0.7}
+                    android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
                   >
                     <View style={styles.dayIcon}>
-                      <Text style={styles.dayIconText}>
-                        {day === 1 ? "A" : day === 2 ? "B" : "A+"}
-                      </Text>
+                      <Text style={styles.dayIconText}>{info.label}</Text>
                     </View>
                     <View style={styles.dayContent}>
-                      <Text style={styles.dayButtonText}>Day {day}</Text>
-                      <Text style={styles.dayButtonSubtext}>
-                        {day === 1
-                          ? "深蹲 · 卧推 · 划船"
-                          : day === 2
-                            ? "深蹲 · 硬拉 · 推举"
-                            : "深蹲 · 卧推 · 划船"}
-                      </Text>
+                      <Text style={styles.dayTitle}>Day {day}</Text>
+                      <Text style={styles.daySubtitle}>{info.moves}</Text>
                     </View>
-                    <View style={styles.dayArrow}>
-                      <Text style={styles.dayArrowText}>→</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
+                    <Ionicons name="chevron-forward" size={16} color="#C7C7CC" />
+                  </Pressable>
+                );
+              })}
             </View>
-          ))}
-        </View>
+          </View>
+        ))}
 
+        {/* 底部提示 */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>💡 点击任意训练日开始你的训练！</Text>
+          <Ionicons name="lightbulb-outline" size={14} color="#8E8E93" />
+          <Text style={styles.footerText}>点击任意训练日开始你的训练</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -130,201 +144,221 @@ export default function GZCLPIndex() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#F7F6FA",
+  },
+  scrollView: {
+    flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
 
+  // 顶部标题区
   header: {
-    backgroundColor: "#007bff",
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 24,
-    elevation: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
-  titleContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
+    paddingVertical: 16,
+    gap: 14,
   },
-  headerEmoji: {
-    fontSize: 48,
-    marginRight: 16,
+  headerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#F3F0FF",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  titleWrapper: {
+  headerText: {
     flex: 1,
   },
   headerTitle: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 4,
-    letterSpacing: 1,
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1C1C1E",
+    marginBottom: 2,
+    letterSpacing: -0.3,
   },
   headerSubtitle: {
-    fontSize: 18,
-    color: "#e0f0ff",
-    opacity: 0.9,
+    fontSize: 13,
+    color: "#8E8E93",
+    lineHeight: 18,
+    fontWeight: "400",
   },
-  headerDivider: {
-    height: 2,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    marginVertical: 16,
-  },
-  headerStats: {
+
+  // 数据统计卡片
+  statsCard: {
     flexDirection: "row",
-    justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   statItem: {
     alignItems: "center",
     flex: 1,
   },
   statNumber: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#6A4C93",
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: "#e0f0ff",
-    opacity: 0.9,
+    color: "#8E8E93",
+    fontWeight: "500",
   },
   statDivider: {
     width: 1,
-    height: 32,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-  },
-  calculatorButton: {
-    backgroundColor: "#fff",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#0056b3",
-  },
-  calculatorButtonText: {
-    color: "#007bff",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  calculatorButtonSubtext: {
-    color: "#666",
-    fontSize: 12,
-    opacity: 0.8,
+    height: 36,
+    backgroundColor: "#EDEDF0",
   },
 
-  weeksContainer: {
-    gap: 16,
-  },
-  weekCard: {
-    backgroundColor: "#fff",
+  // 计算器卡片
+  calculatorCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 20,
-    elevation: 3,
+    padding: 16,
+    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+    gap: 14,
+  },
+  calculatorCardPressed: {
+    backgroundColor: "#FAFAFC",
+    transform: [{ scale: 0.99 }],
+  },
+  calculatorIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#F3F0FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  calculatorContent: {
+    flex: 1,
+  },
+  calculatorTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1C1C1E",
+    marginBottom: 3,
+  },
+  calculatorSubtitle: {
+    fontSize: 13,
+    color: "#8E8E93",
+    lineHeight: 17,
+  },
+
+  // 分区标题
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1C1C1E",
+    marginBottom: 12,
+  },
+
+  // 周计划卡片
+  weekCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   weekHeader: {
-    marginBottom: 16,
+    marginBottom: 14,
   },
   weekBadge: {
-    backgroundColor: "#007bff",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: "#F3F0FF",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 8,
     alignSelf: "flex-start",
     marginBottom: 8,
   },
   weekBadgeText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#fff",
-    letterSpacing: 1,
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#6A4C93",
+    letterSpacing: 0.5,
   },
   weekDescription: {
     fontSize: 14,
-    color: "#666",
-    fontStyle: "italic",
+    color: "#3C3C43",
+    fontWeight: "500",
   },
+
+  // 训练日列表
   daysContainer: {
-    gap: 12,
+    gap: 8,
   },
   dayButton: {
-    backgroundColor: "#f8f9fa",
-    borderRadius: 12,
-    padding: 16,
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#dee2e6",
+    backgroundColor: "#F7F6FA",
+    borderRadius: 12,
+    padding: 12,
+    gap: 12,
+  },
+  dayButtonPressed: {
+    backgroundColor: "#F0EDFA",
   },
   dayIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#007bff",
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#6A4C93",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
   },
   dayIconText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
   dayContent: {
     flex: 1,
   },
-  dayButtonText: {
-    fontSize: 16,
+  dayTitle: {
+    fontSize: 15,
     fontWeight: "600",
-    color: "#333",
+    color: "#1C1C1E",
     marginBottom: 2,
   },
-  dayButtonSubtext: {
+  daySubtitle: {
     fontSize: 12,
-    color: "#666",
-    opacity: 0.8,
-  },
-  dayArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#e9ecef",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  dayArrowText: {
-    fontSize: 18,
-    color: "#666",
-    fontWeight: "bold",
+    color: "#8E8E93",
   },
 
+  // 底部提示
   footer: {
-    marginTop: 24,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+    gap: 6,
   },
   footerText: {
-    color: "#666",
-    fontSize: 14,
-    opacity: 0.8,
+    color: "#8E8E93",
+    fontSize: 13,
     textAlign: "center",
-    paddingHorizontal: 20,
   },
 });
