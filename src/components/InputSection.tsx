@@ -30,9 +30,11 @@ export const InputSection: React.FC<InputSectionProps> = ({
 }) => {
   return (
     <>
-      {/* 性别选择 */}
+      {/* 基本信息 */}
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>基本信息</Text>
+
+        {/* 性别选择 */}
         <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>性别</Text>
           <View style={styles.genderGroup}>
@@ -49,7 +51,7 @@ export const InputSection: React.FC<InputSectionProps> = ({
                   gender === "male" && styles.genderTextActive,
                 ]}
               >
-                👨 男
+                男
               </Text>
             </Pressable>
             <Pressable
@@ -65,24 +67,22 @@ export const InputSection: React.FC<InputSectionProps> = ({
                   gender === "female" && styles.genderTextActive,
                 ]}
               >
-                👩 女
+                女
               </Text>
             </Pressable>
           </View>
         </View>
-      </View>
 
-      {/* 体重输入 */}
-      <View style={styles.sectionCard}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>⚖️ 体重</Text>
+        {/* 体重 */}
+        <View style={styles.inputGroupLast}>
+          <Text style={styles.inputLabel}>体重</Text>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               value={weight}
               onChangeText={setWeight}
               placeholder="请输入体重"
-              placeholderTextColor="#A0A0A5"
+              placeholderTextColor="#C7C7CC"
               keyboardType="numeric"
             />
             <Text style={styles.unitText}>kg</Text>
@@ -90,49 +90,52 @@ export const InputSection: React.FC<InputSectionProps> = ({
         </View>
       </View>
 
-      {/* 三大项输入 */}
+      {/* 三大项极限重量 */}
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>三大项极限重量</Text>
 
+        {/* 深蹲 */}
         <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Squat 🦵 深蹲</Text>
+          <Text style={styles.inputLabel}>深蹲</Text>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               value={squat}
               onChangeText={setSquat}
-              placeholder="深蹲重量"
-              placeholderTextColor="#A0A0A5"
+              placeholder="请输入深蹲 1RM"
+              placeholderTextColor="#C7C7CC"
               keyboardType="numeric"
             />
             <Text style={styles.unitText}>kg</Text>
           </View>
         </View>
 
+        {/* 卧推 */}
         <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Bench Press 💪 卧推</Text>
+          <Text style={styles.inputLabel}>卧推</Text>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               value={bench}
               onChangeText={setBench}
-              placeholder="卧推重量"
-              placeholderTextColor="#A0A0A5"
+              placeholder="请输入卧推 1RM"
+              placeholderTextColor="#C7C7CC"
               keyboardType="numeric"
             />
             <Text style={styles.unitText}>kg</Text>
           </View>
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Deadlift 🏋️ 硬拉</Text>
+        {/* 硬拉 */}
+        <View style={styles.inputGroupLast}>
+          <Text style={styles.inputLabel}>硬拉</Text>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               value={deadlift}
               onChangeText={setDeadlift}
-              placeholder="硬拉重量"
-              placeholderTextColor="#A0A0A5"
+              placeholder="请输入硬拉 1RM"
+              placeholderTextColor="#C7C7CC"
               keyboardType="numeric"
             />
             <Text style={styles.unitText}>kg</Text>

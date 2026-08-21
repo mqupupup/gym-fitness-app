@@ -1,5 +1,6 @@
 import React from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { powerliftingStyles as styles } from "../styles/powerliftingStyles";
 import { AssessmentResult } from "../types/powerlifting";
 
@@ -27,7 +28,7 @@ const getLevelColor = (level: string) => {
     beginner: "#FF9500",
     novice: "#FFCC00",
     intermediate: "#5AC8FA",
-    advanced: "#4CD964",
+    advanced: "#34C759",
     elite: "#FF2D55",
   };
   return colors[level] || "#8E8E93";
@@ -52,8 +53,10 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
   if (loading) {
     return (
       <View style={styles.resultCard}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={{ marginTop: 16, textAlign: "center" }}>计算中...</Text>
+        <ActivityIndicator size="large" color="#6A4C93" />
+        <Text style={{ marginTop: 12, textAlign: "center", color: "#8E8E93", fontSize: 14 }}>
+          计算中...
+        </Text>
       </View>
     );
   }
@@ -61,7 +64,7 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
   if (error) {
     return (
       <View style={styles.errorCard}>
-        <Text style={styles.errorIcon}>⚠️</Text>
+        <Ionicons name="alert-circle" size={20} color="#FF3B30" />
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
@@ -75,26 +78,26 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
 
   return (
     <View style={styles.resultCard}>
-      <Text style={styles.resultTitle}>📊 评估结果</Text>
+      <Text style={styles.resultTitle}>评估结果</Text>
 
       <View style={styles.resultSummary}>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>总重量</Text>
-          <Text style={styles.summaryValue}>{assessment.total}kg</Text>
+          <Text style={styles.summaryValue}>{assessment.total} kg</Text>
         </View>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>体重</Text>
-          <Text style={styles.summaryValue}>{assessment.bodyWeight}kg</Text>
+          <Text style={styles.summaryValue}>{assessment.bodyWeight} kg</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>系数</Text>
+          <Text style={styles.summaryLabel}>系数标准</Text>
           <Text style={styles.summaryValue}>
             {getCoefficientDisplayName(assessment.coefficient)}
           </Text>
         </View>
-        <View style={styles.summaryItem}>
+        <View style={[styles.summaryItem, styles.summaryItemLast]}>
           <Text style={styles.summaryLabel}>标准化分数</Text>
-          <Text style={styles.summaryValue}>
+          <Text style={[styles.summaryValue, { color: "#6A4C93" }]}>
             {assessment.normalizedScore.toFixed(2)}
           </Text>
         </View>
@@ -124,7 +127,7 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
         <Text style={styles.detailText}>
           计算公式: 总重量 × 系数值 = 标准化分数
         </Text>
-        <Text style={styles.detailText}>
+        <Text style={[styles.detailText, styles.detailTextLast]}>
           {assessment.total} × {assessment.coefficientValue.toFixed(6)} ={" "}
           {assessment.normalizedScore.toFixed(2)}
         </Text>
