@@ -29,9 +29,26 @@ export default function CanditoPlanIndex() {
           </View>
           <View style={styles.headerText}>
             <Text style={styles.headerTitle}>Candito 6周</Text>
-            <Text style={styles.headerSubtitle}>线性进阶周期计划，结构清晰，系统提升三大项</Text>
+            <Text style={styles.headerSubtitle}>
+              线性进阶周期计划，结构清晰，系统提升三大项
+            </Text>
           </View>
         </View>
+
+        {/* 开始按钮 */}
+        <Pressable
+          style={styles.startCard}
+          onPress={() => router.push("/powerlifting-plans/candito-6-week/candito-input")}
+        >
+          <View style={styles.startIcon}>
+            <Ionicons name="play-circle-outline" size={28} color="#FFFFFF" />
+          </View>
+          <View style={styles.startContent}>
+            <Text style={styles.startTitle}>开始训练计划</Text>
+            <Text style={styles.startSubtitle}>输入三大项 1RM，自动生成6周训练重量</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+        </Pressable>
 
         {/* 计划说明卡片 */}
         <View style={styles.infoCard}>
@@ -41,49 +58,52 @@ export default function CanditoPlanIndex() {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>深蹲可选择高杠或低杠，硬拉可选择传统式或相扑式</Text>
+            <Text style={styles.infoText}>
+              深蹲可选择高杠或低杠，硬拉可选择传统式或相扑式
+            </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>MR = 使用指定重量，尽可能多次重复，直到力竭</Text>
+            <Text style={styles.infoText}>
+              MR = 使用指定重量，尽可能多次重复，直到力竭
+            </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>MR10 = 使用指定重量，做到 10 次仍未力竭则停止</Text>
+            <Text style={styles.infoText}>
+              MR10 = 使用指定重量，做到 10 次仍未力竭则停止
+            </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>任何规定次数出现力竭，立即将 1RM 重量减少 2.5%</Text>
+            <Text style={styles.infoText}>
+              任何规定次数出现力竭，立即将 1RM 重量减少 2.5%
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoBullet}>•</Text>
+            <Text style={styles.infoText}>
+              第5周记录极限组完成次数，用于第6周预估新1RM
+            </Text>
           </View>
         </View>
 
-        {/* 周计划列表 */}
-        <Text style={styles.sectionTitle}>训练周计划</Text>
+        {/* 周计划概览 */}
+        <Text style={styles.sectionTitle}>6周计划概览</Text>
         {Object.values(CANDITO_PROGRAM).map((week: any) => (
-          <Pressable
-            key={week.id}
-            style={({ pressed }) => [
-              styles.weekCard,
-              pressed && styles.weekCardPressed,
-            ]}
-            onPress={() =>
-              router.push(`/powerlifting-plans/candito-6-week/week?weekId=${week.id}`)
-            }
-            android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
-          >
+          <View key={week.id} style={styles.weekCard}>
             <View style={styles.weekBadge}>
               <Text style={styles.weekBadgeText}>第{week.id}周</Text>
             </View>
             <View style={styles.weekContent}>
-              <Text style={styles.weekTitle}>{week.title}</Text>
+              <Text style={styles.weekTitle}>{week.title.replace(/^第\d+周[：:]/, "")}</Text>
               <Text style={styles.weekFocus}>{week.focus}</Text>
-              <Text style={styles.weekDescription} numberOfLines={2}>
-                {week.description}
-              </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#C7C7CC" />
-          </Pressable>
+            <Text style={styles.weekDays}>{week.days.length}天</Text>
+          </View>
         ))}
+
+        <View style={{ height: 20 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -101,8 +121,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-
-  // 顶部标题区
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -131,10 +149,42 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#8E8E93",
     lineHeight: 18,
-    fontWeight: "400",
   },
-
-  // 计划说明卡片
+  startCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#6A4C93",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 20,
+    gap: 14,
+    shadowColor: "#6A4C93",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  startIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  startContent: {
+    flex: 1,
+  },
+  startTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 2,
+  },
+  startSubtitle: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.8)",
+  },
   infoCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
@@ -173,40 +223,33 @@ const styles = StyleSheet.create({
     color: "#3C3C43",
     lineHeight: 18,
   },
-
-  // 分区标题
   sectionTitle: {
     fontSize: 15,
     fontWeight: "700",
     color: "#1C1C1E",
     marginBottom: 12,
   },
-
-  // 周计划卡片
   weekCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 10,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-    gap: 14,
-  },
-  weekCardPressed: {
-    backgroundColor: "#FAFAFC",
-    transform: [{ scale: 0.99 }],
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+    gap: 12,
   },
   weekBadge: {
     backgroundColor: "#F3F0FF",
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 5,
     borderRadius: 8,
-    alignSelf: "flex-start",
+    minWidth: 52,
+    alignItems: "center",
   },
   weekBadgeText: {
     fontSize: 12,
@@ -217,66 +260,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   weekTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: "#1C1C1E",
-    marginBottom: 3,
+    marginBottom: 2,
   },
   weekFocus: {
-    fontSize: 13,
-    color: "#6A4C93",
-    fontWeight: "600",
-    marginBottom: 3,
-  },
-  weekDescription: {
     fontSize: 12,
     color: "#8E8E93",
-    lineHeight: 16,
   },
-
-  // 分隔线
-  sectionDivider: {
-    height: 1,
-    backgroundColor: "#E8E8ED",
-    marginVertical: 16,
-  },
-
-  // 查看训练记录入口卡片
-  logEntryCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F3F0FF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 10,
-    borderWidth: 1.5,
-    borderColor: "#6A4C93",
-    gap: 14,
-  },
-  logEntryCardPressed: {
-    backgroundColor: "#E8E3FF",
-    transform: [{ scale: 0.99 }],
-  },
-  logEntryIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logEntryContent: {
-    flex: 1,
-  },
-  logEntryTitle: {
-    fontSize: 16,
-    fontWeight: "700",
+  weekDays: {
+    fontSize: 12,
+    fontWeight: "600",
     color: "#6A4C93",
-    marginBottom: 3,
-  },
-  logEntrySubtitle: {
-    fontSize: 13,
-    color: "#7C6C9D",
-    lineHeight: 17,
+    backgroundColor: "#F3F0FF",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
 });
