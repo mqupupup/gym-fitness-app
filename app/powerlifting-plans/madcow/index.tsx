@@ -1,147 +1,194 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect } from "react";
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  generateMadcowPlan,
-  MadcowTestInputs,
-} from "../../../src/lib/madcow-calculator";
 
-const INITIAL_INPUTS: MadcowTestInputs = {
-  squat: 140,
-  bench: 90,
-  row: 80,
-  press: 60,
-  deadlift: 155,
-};
-
-const INPUT_FIELDS: { label: string; field: keyof MadcowTestInputs; reps: string }[] = [
-  { label: "深蹲", field: "squat", reps: "5次" },
-  { label: "卧推", field: "bench", reps: "5次" },
-  { label: "划船", field: "row", reps: "12次" },
-  { label: "推举", field: "press", reps: "3次" },
-  { label: "硬拉", field: "deadlift", reps: "3次" },
+const WEEK_PHASES = [
+  { week: 1, phase: "基础适应期", desc: "建立动作模式，适应递增节奏" },
+  { week: 2, phase: "基础适应期", desc: "持续加量，巩固技术动作" },
+  { week: 3, phase: "基础适应期", desc: "稳步提升，准备PR测试" },
+  { week: 4, phase: "基础适应期", desc: "PR匹配周，测试5RM极限" },
+  { week: 5, phase: "线性进阶期", desc: "新周期开始，持续直线进步" },
+  { week: 6, phase: "线性进阶期", desc: "稳步递增，积累训练量" },
+  { week: 7, phase: "线性进阶期", desc: "强度提升，突破平台期" },
+  { week: 8, phase: "线性进阶期", desc: "持续进阶，巩固力量基础" },
+  { week: 9, phase: "强度突破期", desc: "高强度训练，冲击新极限" },
+  { week: 10, phase: "强度突破期", desc: "稳步提升，准备最终突破" },
+  { week: 11, phase: "强度突破期", desc: "最后冲刺，最大化力量" },
+  { week: 12, phase: "强度突破期", desc: "计划完成，测试最终成果" },
 ];
 
-export default function MadcowHome() {
+export default function MadcowIndex() {
   const router = useRouter();
   const navigation = useNavigation();
-  const [inputs, setInputs] = useState<MadcowTestInputs>(INITIAL_INPUTS);
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: "Madcow 5x5" });
   }, [navigation]);
 
-  const updateField = (field: keyof MadcowTestInputs, value: string) => {
-    setInputs((prev) => ({ ...prev, [field]: parseFloat(value) || 0 }));
-  };
-
-  const handleGenerate = async () => {
-    const fields = Object.entries(inputs);
-    const invalid = fields.find(([, v]) => v <= 0);
-    if (invalid) {
-      Alert.alert("请输入有效的测试重量");
-      return;
-    }
-
-    const plan = generateMadcowPlan(inputs);
-    await AsyncStorage.setItem("madcow_plan", JSON.stringify(plan));
-    await AsyncStorage.setItem("madcow_inputs", JSON.stringify(inputs));
-    router.push("/powerlifting-plans/madcow/1");
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ title: "Madcow 5x5" }} />
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
       >
         {/* 顶部标题区 */}
         <View style={styles.header}>
           <View style={styles.headerIcon}>
-            <Ionicons name="fitness-outline" size={24} color="#6A4C93" />
+            <Ionicons name="trending-up-outline" size={28} color="#6A4C93" />
           </View>
           <View style={styles.headerText}>
             <Text style={styles.headerTitle}>Madcow 5x5</Text>
-            <Text style={styles.headerSubtitle}>输入测试数据，自动生成 12 周训练计划</Text>
+            <Text style={styles.headerSubtitle}>
+              适合中高级训练者的12周直线力量进阶计划
+            </Text>
           </View>
         </View>
 
-        {/* 输入卡片 */}
-        <View style={styles.inputCard}>
-          <Text style={styles.cardTitle}>测试重量</Text>
-          <Text style={styles.cardSubtitle}>你能标准完成指定次数的最大重量</Text>
-
-          {INPUT_FIELDS.map((item, index) => (
-            <View
-              key={item.field}
-              style={[
-                styles.inputRow,
-                index < INPUT_FIELDS.length - 1 && styles.inputRowBorder,
-              ]}
-            >
-              <View style={styles.inputLabelContainer}>
-                <Text style={styles.inputLabel}>{item.label}</Text>
-                <Text style={styles.inputReps}>{item.reps}</Text>
-              </View>
-              <View style={styles.inputField}>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={String(inputs[item.field])}
-                  onChangeText={(v) => updateField(item.field, v)}
-                  placeholderTextColor="#C7C7CC"
-                />
-                <Text style={styles.unit}>kg</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* 生成按钮 */}
+        {/* 开始按钮 */}
         <Pressable
           style={({ pressed }) => [
-            styles.generateButton,
-            pressed && styles.generateButtonPressed,
+            styles.startButton,
+            pressed && styles.startButtonPressed,
           ]}
-          onPress={handleGenerate}
+          onPress={() => router.push("/powerlifting-plans/madcow/madcow-input")}
           android_ripple={{ color: "rgba(255,255,255,0.15)" }}
         >
-          <Ionicons name="flash-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.generateButtonText}>生成 12 周训练计划</Text>
+          <Ionicons name="play-circle-outline" size={22} color="#FFFFFF" />
+          <Text style={styles.startButtonText}>开始设置参数</Text>
         </Pressable>
 
-        {/* 说明卡片 */}
-        <View style={styles.infoCard}>
-          <View style={styles.infoHeader}>
-            <Ionicons name="information-circle-outline" size={16} color="#6A4C93" />
-            <Text style={styles.infoTitle}>计算说明</Text>
+        {/* 统计卡片 */}
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>12</Text>
+            <Text style={styles.statLabel}>周计划</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>所有训练重量自动按 2.5kg 取整</Text>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>3</Text>
+            <Text style={styles.statLabel}>天/周</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>组间递增 12.5%，每周顶层组递增约 2.5%</Text>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>5</Text>
+            <Text style={styles.statLabel}>核心动作</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoBullet}>•</Text>
-            <Text style={styles.infoText}>专注深蹲、卧推、硬拉和推举的基础训练</Text>
+        </View>
+
+        {/* 计划核心逻辑 */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>计划核心逻辑</Text>
+          <View style={styles.logicItem}>
+            <View style={styles.logicBadge}>
+              <Text style={styles.logicBadgeText}>1</Text>
+            </View>
+            <View style={styles.logicContent}>
+              <Text style={styles.logicTitle}>递增热身组</Text>
+              <Text style={styles.logicDesc}>
+                前4组按12.5%组间递增，最后1组为正式组，既保量又保强度
+              </Text>
+            </View>
+          </View>
+          <View style={styles.logicItem}>
+            <View style={styles.logicBadge}>
+              <Text style={styles.logicBadgeText}>2</Text>
+            </View>
+            <View style={styles.logicContent}>
+              <Text style={styles.logicTitle}>周五强度突破</Text>
+              <Text style={styles.logicDesc}>
+                加1×3强度组（+2.5%）和1×8容量组，用3次更重的重量驱动进步
+              </Text>
+            </View>
+          </View>
+          <View style={styles.logicItem}>
+            <View style={styles.logicBadge}>
+              <Text style={styles.logicBadgeText}>3</Text>
+            </View>
+            <View style={styles.logicContent}>
+              <Text style={styles.logicTitle}>直线进阶</Text>
+              <Text style={styles.logicDesc}>
+                下周周一正式组 = 本周周五1×3重量，实现重量的跨越式增长
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 每周训练安排 */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>每周训练安排</Text>
+          <View style={styles.dayRow}>
+            <View style={[styles.dayBadge, styles.dayBadgeMon]}>
+              <Text style={styles.dayBadgeText}>周一</Text>
+            </View>
+            <View style={styles.dayContent}>
+              <Text style={styles.dayTitle}>正式组日</Text>
+              <Text style={styles.dayDesc}>深蹲 · 卧推 · 俯身划船（5组×5次）</Text>
+            </View>
+          </View>
+          <View style={styles.dayRow}>
+            <View style={[styles.dayBadge, styles.dayBadgeWed]}>
+              <Text style={styles.dayBadgeText}>周三</Text>
+            </View>
+            <View style={styles.dayContent}>
+              <Text style={styles.dayTitle}>轻量恢复日</Text>
+              <Text style={styles.dayDesc}>轻量深蹲 · 推举 · 硬拉（4组×5次）</Text>
+            </View>
+          </View>
+          <View style={styles.dayRow}>
+            <View style={[styles.dayBadge, styles.dayBadgeFri]}>
+              <Text style={styles.dayBadgeText}>周五</Text>
+            </View>
+            <View style={styles.dayContent}>
+              <Text style={styles.dayTitle}>强度突破日</Text>
+              <Text style={styles.dayDesc}>深蹲 · 卧推 · 划船（4×5 + 1×3 + 1×8）</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 12周概览 */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>12周阶段概览</Text>
+          <View style={styles.weekGrid}>
+            {WEEK_PHASES.map((w) => (
+              <View key={w.week} style={styles.weekItem}>
+                <View style={styles.weekNum}>
+                  <Text style={styles.weekNumText}>W{w.week}</Text>
+                </View>
+                <View style={styles.weekInfo}>
+                  <Text style={styles.weekPhase}>{w.phase}</Text>
+                  <Text style={styles.weekDesc} numberOfLines={1}>
+                    {w.desc}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* 适合人群 */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>适合人群</Text>
+          <View style={styles.tipRow}>
+            <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
+            <Text style={styles.tipText}>
+              深蹲1.5-2倍体重、硬拉2-2.5倍体重、卧推1.25-1.5倍体重
+            </Text>
+          </View>
+          <View style={styles.tipRow}>
+            <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
+            <Text style={styles.tipText}>普通5x5/3x5计划已无法继续进步的中高级训练者</Text>
+          </View>
+          <View style={styles.tipRow}>
+            <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
+            <Text style={styles.tipText}>目标是力量提升，至少可坚持3-4个月</Text>
           </View>
         </View>
       </ScrollView>
@@ -161,8 +208,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-
-  // 顶部标题区
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -170,9 +215,9 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   headerIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 56,
+    height: 56,
+    borderRadius: 14,
     backgroundColor: "#F3F0FF",
     alignItems: "center",
     justifyContent: "center",
@@ -181,92 +226,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
     color: "#1C1C1E",
-    marginBottom: 2,
-    letterSpacing: -0.3,
+    marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 13,
     color: "#8E8E93",
     lineHeight: 18,
-    fontWeight: "400",
   },
-
-  // 输入卡片
-  inputCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#1C1C1E",
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 13,
-    color: "#8E8E93",
-    marginBottom: 16,
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    gap: 12,
-  },
-  inputRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F3",
-  },
-  inputLabelContainer: {
-    width: 90,
-  },
-  inputLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1C1C1E",
-    marginBottom: 2,
-  },
-  inputReps: {
-    fontSize: 12,
-    color: "#8E8E93",
-  },
-  inputField: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F7F7F8",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#EDEDF0",
-    paddingHorizontal: 14,
-  },
-  input: {
-    flex: 1,
-    height: 44,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1C1C1E",
-    textAlign: "right",
-  },
-  unit: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#8E8E93",
-    marginLeft: 8,
-  },
-
-  // 生成按钮
-  generateButton: {
+  startButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -281,50 +251,184 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
   },
-  generateButtonPressed: {
+  startButtonPressed: {
     backgroundColor: "#5A3D80",
     transform: [{ scale: 0.98 }],
   },
-  generateButtonText: {
+  startButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
     letterSpacing: 0.3,
   },
-
-  // 说明卡片
-  infoCard: {
+  statsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 16,
+  },
+  statCard: {
+    flex: 1,
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 12,
+    padding: 14,
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
   },
-  infoHeader: {
+  statValue: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#6A4C93",
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#8E8E93",
+  },
+  sectionCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1C1C1E",
+    marginBottom: 14,
+  },
+  logicItem: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 14,
+  },
+  logicItem: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 14,
+  },
+  logicBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#F3F0FF",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  logicBadgeText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#6A4C93",
+  },
+  logicContent: {
+    flex: 1,
+  },
+  logicTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1C1C1E",
+    marginBottom: 2,
+  },
+  logicDesc: {
+    fontSize: 13,
+    color: "#6B6B70",
+    lineHeight: 18,
+  },
+  dayRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
-    gap: 6,
+    gap: 12,
+    marginBottom: 12,
   },
-  infoTitle: {
-    fontSize: 14,
+  dayBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  dayBadgeMon: {
+    backgroundColor: "#EDE7F6",
+  },
+  dayBadgeWed: {
+    backgroundColor: "#E8F5E9",
+  },
+  dayBadgeFri: {
+    backgroundColor: "#FFF3E0",
+  },
+  dayBadgeText: {
+    fontSize: 12,
     fontWeight: "700",
     color: "#1C1C1E",
   },
-  infoRow: {
-    flexDirection: "row",
-    marginBottom: 6,
+  dayContent: {
+    flex: 1,
+  },
+  dayTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1C1C1E",
+    marginBottom: 2,
+  },
+  dayDesc: {
+    fontSize: 12,
+    color: "#8E8E93",
+  },
+  weekGrid: {
     gap: 8,
   },
-  infoBullet: {
-    fontSize: 13,
-    color: "#6A4C93",
-    fontWeight: "700",
+  weekItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: "#F7F6FA",
+    borderRadius: 10,
+    padding: 10,
   },
-  infoText: {
+  weekNum: {
+    width: 36,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: "#6A4C93",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  weekNumText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  weekInfo: {
+    flex: 1,
+  },
+  weekPhase: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1C1C1E",
+    marginBottom: 1,
+  },
+  weekDesc: {
+    fontSize: 11,
+    color: "#8E8E93",
+  },
+  tipRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    marginBottom: 8,
+  },
+  tipText: {
     flex: 1,
     fontSize: 13,
     color: "#3C3C43",

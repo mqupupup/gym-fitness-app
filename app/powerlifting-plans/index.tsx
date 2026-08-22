@@ -44,12 +44,12 @@ const powerliftingPlans = [
   },
   {
     id: "madcow",
-    title: "疯牛55 (Madcow 5x5)",
+    title: "疯牛5x5 (Madcow 5x5)",
     description:
       "基于 5x5 理念的中级训练计划，在 StrongLifts 社区和中级训练者中较常见。专注于深蹲、卧推、硬拉和推举的基础训练。",
     icon: "fitness-outline",
     difficulty: "初级-中级",
-    duration: "9周",
+    duration: "12周",
   },
 ];
 
