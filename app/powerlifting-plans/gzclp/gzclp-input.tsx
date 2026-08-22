@@ -34,7 +34,7 @@ export default function GZCLPInput() {
   });
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: "设置 5RM" });
+    navigation.setOptions({ title: "GZCLP参数设置" });
   }, [navigation]);
 
   const handleChange = (key: LiftKey, value: string) => {
@@ -90,11 +90,12 @@ export default function GZCLPInput() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
+        style={styles.keyboardContainer}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
           {/* 顶部说明 */}
           <View style={styles.header}>
@@ -132,18 +133,21 @@ export default function GZCLPInput() {
           </View>
 
           {/* 输入框 */}
-          <Text style={styles.sectionTitle}>四项动作 5RM (kg)</Text>
+          <Text style={styles.sectionTitle}>四项动作 5RM</Text>
           {LIFT_KEYS.map((key) => (
             <View key={key} style={styles.inputGroup}>
               <Text style={styles.inputLabel}>{LIFT_NAMES[key]}</Text>
-              <TextInput
-                style={[styles.input, errors[key] && styles.inputError]}
-                keyboardType="numeric"
-                placeholder="输入 5RM 重量"
-                placeholderTextColor="#C7C7CC"
-                value={fiveRMs[key]}
-                onChangeText={(v) => handleChange(key, v)}
-              />
+              <View style={[styles.inputWrapper, errors[key] && styles.inputWrapperError]}>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  placeholder="请输入你的5RM重量"
+                  placeholderTextColor="#C7C7CC"
+                  value={fiveRMs[key]}
+                  onChangeText={(v) => handleChange(key, v)}
+                />
+                <Text style={styles.inputUnit}>kg</Text>
+              </View>
               {errors[key] && (
                 <Text style={styles.errorText}>请输入有效的重量</Text>
               )}
@@ -173,7 +177,11 @@ export default function GZCLPInput() {
             </View>
           )}
 
-          {/* 生成按钮 */}
+          <View style={{ height: 20 }} />
+        </ScrollView>
+
+        {/* 固定底部按钮 */}
+        <View style={styles.footer}>
           <Pressable
             style={({ pressed }) => [
               styles.generateButton,
@@ -183,9 +191,7 @@ export default function GZCLPInput() {
           >
             <Text style={styles.generateButtonText}>生成 12 周训练计划</Text>
           </Pressable>
-
-          <View style={{ height: 20 }} />
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -196,9 +202,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7F6FA",
   },
+  keyboardContainer: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   header: {
     flexDirection: "row",
@@ -262,21 +271,37 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#3C3C43",
+    color: "#1C1C1E",
     marginBottom: 6,
   },
-  input: {
-    backgroundColor: "#F7F7F8",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "#1C1C1E",
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: "transparent",
+    borderColor: "#E5E5EA",
+    paddingHorizontal: 16,
+    height: 56,
   },
-  inputError: {
+  inputWrapperError: {
     borderColor: "#FF3B30",
+  },
+  input: {
+    flex: 1,
+    height: "100%",
+    paddingVertical: 0,
+    paddingRight: 8,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1C1C1E",
+    textAlignVertical: "center",
+  },
+  inputUnit: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#8E8E93",
+    paddingLeft: 8,
   },
   errorText: {
     fontSize: 12,
@@ -288,7 +313,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     marginTop: 8,
-    marginBottom: 20,
+    marginBottom: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -337,12 +362,19 @@ const styles = StyleSheet.create({
     height: 24,
     backgroundColor: "#E8E8ED",
   },
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === "ios" ? 20 : 16,
+    backgroundColor: "#F7F6FA",
+    borderTopWidth: 1,
+    borderTopColor: "#EDEDF0",
+  },
   generateButton: {
     backgroundColor: "#6A4C93",
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center",
-    marginTop: 8,
     shadowColor: "#6A4C93",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
