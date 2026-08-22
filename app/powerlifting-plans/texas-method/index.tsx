@@ -56,20 +56,24 @@ export default function TexasMethodPlans() {
           </View>
         </View>
 
-        {/* 计划简介卡片 */}
+        {/* 计划说明卡片 */}
         <View style={styles.introCard}>
-          <Text style={styles.introTitle}>计划特点</Text>
+          <Text style={styles.introTitle}>计划说明</Text>
           <View style={styles.introRow}>
             <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
-            <Text style={styles.introText}>每周 3 练：容量日、恢复日、强度日，结构清晰</Text>
+            <Text style={styles.introText}>三日结构：周一容量日、周三恢复日、周五强度日</Text>
           </View>
           <View style={styles.introRow}>
             <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
-            <Text style={styles.introText}>被《Practical Programming》等权威教材收录</Text>
+            <Text style={styles.introText}>将容量—恢复—强度压缩在一周内</Text>
           </View>
           <View style={styles.introRow}>
             <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
-            <Text style={styles.introText}>适合新手到中级训练者，快速建立力量基础</Text>
+            <Text style={styles.introText}>强度日逐步挑战新的5RM，被《Practical Programming》收录</Text>
+          </View>
+          <View style={styles.introRow}>
+            <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
+            <Text style={styles.introText}>适合从新手线性进阶毕业后的中级训练者</Text>
           </View>
         </View>
 

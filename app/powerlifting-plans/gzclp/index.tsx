@@ -78,27 +78,27 @@ export default function GZCLPIndex() {
             <Text style={styles.infoTitle}>计划说明</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoBullet}>T1</Text>
+            <Text style={styles.infoBullet}>•</Text>
             <Text style={styles.infoText}>
-              主项动作，3×5+（最后一组尽力多做），起始重量 = 5RM×85%，每周递增 2.5kg
+              T1/T2/T3三级训练结构，A/B日交替轮换
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoBullet}>T2</Text>
+            <Text style={styles.infoBullet}>•</Text>
             <Text style={styles.infoText}>
-              辅助动作，10×3，固定重量 = 5RM×65%，全程不变
+              以T1/T2的线性进阶为核心，T3用于补充训练量和肌肥大
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoBullet}>T3</Text>
+            <Text style={styles.infoBullet}>•</Text>
             <Text style={styles.infoText}>
-              自选辅助动作（俯身划船/引体向上），自选重量和次数
+              连续无法完成目标后，按照计划规则降重并重新进阶
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoBullet}>Reset</Text>
+            <Text style={styles.infoBullet}>•</Text>
             <Text style={styles.infoText}>
-              第 8 周起如无法完成 T1，降低 10-15% 重量重新线性进阶
+              适合新手建立基础力量并通过线性进阶快速提升
             </Text>
           </View>
         </View>

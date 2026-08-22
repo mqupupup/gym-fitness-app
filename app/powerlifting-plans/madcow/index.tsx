@@ -83,17 +83,17 @@ export default function MadcowIndex() {
           </View>
         </View>
 
-        {/* 计划核心逻辑 */}
+        {/* 计划说明 */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>计划核心逻辑</Text>
+          <Text style={styles.sectionTitle}>计划说明</Text>
           <View style={styles.logicItem}>
             <View style={styles.logicBadge}>
               <Text style={styles.logicBadgeText}>1</Text>
             </View>
             <View style={styles.logicContent}>
-              <Text style={styles.logicTitle}>递增热身组</Text>
+              <Text style={styles.logicTitle}>递增工作组</Text>
               <Text style={styles.logicDesc}>
-                前4组按12.5%组间递增，最后1组为正式组，既保量又保强度
+                三日递增式5×5结构，前几组递增负重，最后一组达到当日目标重量
               </Text>
             </View>
           </View>
@@ -104,7 +104,7 @@ export default function MadcowIndex() {
             <View style={styles.logicContent}>
               <Text style={styles.logicTitle}>周五强度突破</Text>
               <Text style={styles.logicDesc}>
-                加1×3强度组（+2.5%）和1×8容量组，用3次更重的重量驱动进步
+                周三轻量恢复，周五进行强度突破，并将周五的进阶重量带入下一周
               </Text>
             </View>
           </View>
@@ -113,9 +113,9 @@ export default function MadcowIndex() {
               <Text style={styles.logicBadgeText}>3</Text>
             </View>
             <View style={styles.logicContent}>
-              <Text style={styles.logicTitle}>直线进阶</Text>
+              <Text style={styles.logicTitle}>线性进阶周期</Text>
               <Text style={styles.logicDesc}>
-                下周周一正式组 = 本周周五1×3重量，实现重量的跨越式增长
+                通常按约12周的线性进阶周期运行，适合已有力量基础的中级训练者
               </Text>
             </View>
           </View>

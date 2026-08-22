@@ -43,20 +43,24 @@ export default function Wendler531Page() {
           </View>
         </View>
 
-        {/* 计划简介卡片 */}
+        {/* 计划说明卡片 */}
         <View style={styles.introCard}>
-          <Text style={styles.introTitle}>计划特点</Text>
+          <Text style={styles.introTitle}>计划说明</Text>
           <View style={styles.introRow}>
             <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
-            <Text style={styles.introText}>百分比系统 + RPE 调节，灵活适配不同水平</Text>
+            <Text style={styles.introText}>基于 Training Max（通常为1RM的90%）的百分比系统推进</Text>
           </View>
           <View style={styles.introRow}>
             <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
-            <Text style={styles.introText}>主项 3 组递增 + 辅助组 BBB，兼顾力量与容量</Text>
+            <Text style={styles.introText}>4周一个循环，逐步提高训练强度并设置减量/恢复周</Text>
           </View>
           <View style={styles.introRow}>
             <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
-            <Text style={styles.introText}>适合中级到高级训练者，注重长期可持续进步</Text>
+            <Text style={styles.introText}>主项采用5/3/1周期训练，辅助训练可使用BBB等模板</Text>
+          </View>
+          <View style={styles.introRow}>
+            <Ionicons name="checkmark-circle" size={16} color="#6A4C93" />
+            <Text style={styles.introText}>适合希望长期、稳步提高力量的训练者</Text>
           </View>
         </View>
 

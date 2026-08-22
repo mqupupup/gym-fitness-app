@@ -59,31 +59,31 @@ export default function CanditoPlanIndex() {
           <View style={styles.infoRow}>
             <Text style={styles.infoBullet}>•</Text>
             <Text style={styles.infoText}>
-              深蹲可选择高杠或低杠，硬拉可选择传统式或相扑式
+              6周周期化：肌肉调理→增肌→力量→重量适应/爆发→高强度力量训练→减量或测试
             </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoBullet}>•</Text>
             <Text style={styles.infoText}>
-              MR = 使用指定重量，尽可能多次重复，直到力竭
+              基于1RM百分比，包含MR（最大次数）和MR10训练
             </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoBullet}>•</Text>
             <Text style={styles.infoText}>
-              MR10 = 使用指定重量，做到 10 次仍未力竭则停止
+              未达到规定最低次数时，按规则下调训练最大重量
             </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoBullet}>•</Text>
             <Text style={styles.infoText}>
-              任何规定次数出现力竭，立即将 1RM 重量减少 2.5%
+              第6周可选择减量或测试1RM；若测试，通常随后增加1周减量
             </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoBullet}>•</Text>
             <Text style={styles.infoText}>
-              第5周记录极限组完成次数，用于第6周预估新1RM
+              适合中级到中高级训练者
             </Text>
           </View>
         </View>
