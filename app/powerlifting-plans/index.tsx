@@ -4,54 +4,13 @@ import { useRouter } from "expo-router";
 import { useLayoutEffect } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { POWERLIFTING_PLANS, PowerliftingPlan as PlanData } from "../../src/data/powerlifting-plans";
 
-const powerliftingPlans = [
-  {
-    id: "wendler-531",
-    title: "Wendler 5-3-1",
-    description:
-      "Jim Wendler 的经典周期化训练计划，适合中级到高级训练者。采用百分比系统和 RPE 调节，注重长期可持续进步。",
-    icon: "calendar-outline",
-    difficulty: "中级-高级",
-    duration: "4周循环",
-  },
-  {
-    id: "texas-method",
-    title: "德州计划 (Texas Method)",
-    description:
-      "经典的三日分化训练（容量日、恢复日、强度日），被《Practical Programming》等权威教材收录，适合新手到中级训练者。",
-    icon: "barbell-outline",
-    difficulty: "初级-中级",
-    duration: "每周循环",
-  },
-  {
-    id: "candito-6-week",
-    title: "Candito 6周计划",
-    description:
-      "线性进阶的 6 周周期计划，结构清晰易执行。在 Reddit 和力量训练社区广受欢迎，适合希望系统提升三大项的训练者。",
-    icon: "trending-up-outline",
-    difficulty: "中级",
-    duration: "6周",
-  },
-  {
-    id: "gzclp",
-    title: "GZCLP",
-    description:
-      "Cody Lefever 创建的系统化训练方法，强调渐进超负荷和个体化调整。在专业训练圈内认可度高，适合自学者。",
-    icon: "stats-chart-outline",
-    difficulty: "中级-高级",
-    duration: "持续进阶",
-  },
-  {
-    id: "madcow",
-    title: "疯牛5x5 (Madcow 5x5)",
-    description:
-      "基于 5x5 理念的中级训练计划，在 StrongLifts 社区和中级训练者中较常见。专注于深蹲、卧推、硬拉和推举的基础训练。",
-    icon: "fitness-outline",
-    difficulty: "初级-中级",
-    duration: "12周",
-  },
-];
+const FATIGUE_COLORS: Record<string, string> = {
+  low: "#34C759",
+  moderate: "#FF9500",
+  high: "#FF3B30",
+};
 
 export default function PowerliftingPlan() {
   const router = useRouter();
@@ -61,13 +20,12 @@ export default function PowerliftingPlan() {
     navigation.setOptions({ title: "力量举计划" });
   }, [navigation]);
 
-  const handleStartTraining = (planId: string) => {
-    router.push(`/powerlifting-plans/${planId}`);
+  const handleStartTraining = (plan: PlanData) => {
+    router.push(plan.route);
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* 顶部标题区（水平排列：Icon + 标题 + 副标题） */}
       <View style={styles.header}>
         <View style={styles.headerIcon}>
           <Ionicons name="trophy-outline" size={24} color="#6A4C93" />
@@ -83,7 +41,7 @@ export default function PowerliftingPlan() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {powerliftingPlans.map((plan) => (
+        {POWERLIFTING_PLANS.map((plan) => (
           <View key={plan.id} style={styles.planCard}>
             <View style={styles.planHeader}>
               <View style={styles.planIcon}>
@@ -91,21 +49,68 @@ export default function PowerliftingPlan() {
               </View>
               <View style={styles.planInfo}>
                 <Text style={styles.planTitle}>{plan.title}</Text>
-                <View style={styles.planMeta}>
-                  <View style={styles.difficultyTag}>
-                    <Text style={styles.difficultyText}>{plan.difficulty}</Text>
-                  </View>
-                  <Text style={styles.planDuration}>{plan.duration}</Text>
-                </View>
+                <Text style={styles.planSubtitle}>{plan.subtitle}</Text>
               </View>
             </View>
+
+            {/* 元信息标签行 */}
+            <View style={styles.metaRow}>
+              <View style={styles.difficultyTag}>
+                <Text style={styles.difficultyText}>{plan.experienceLevel.typical}</Text>
+              </View>
+              <View style={styles.metaItem}>
+                <Ionicons name="calendar-outline" size={12} color="#8E8E93" />
+                <Text style={styles.metaText}>{plan.duration}</Text>
+              </View>
+              <View style={styles.metaItem}>
+                <Ionicons name="time-outline" size={12} color="#8E8E93" />
+                <Text style={styles.metaText}>{plan.frequency}天/周</Text>
+              </View>
+            </View>
+
+            {/* 进阶类型 + 疲劳管理 */}
+            <View style={styles.attrRow}>
+              <View style={styles.attrItem}>
+                <Text style={styles.attrLabel}>周期结构</Text>
+                <Text style={styles.attrValue}>{plan.progressionTypeLabel}</Text>
+              </View>
+              <View style={styles.attrDivider} />
+              <View style={styles.attrItem}>
+                <Text style={styles.attrLabel}>疲劳管理</Text>
+                <View style={styles.attrValueRow}>
+                  <View
+                    style={[
+                      styles.fatigueDot,
+                      { backgroundColor: FATIGUE_COLORS[plan.fatigueManagement] },
+                    ]}
+                  />
+                  <Text style={styles.attrValue}>{plan.fatigueManagementLabel}</Text>
+                </View>
+              </View>
+              <View style={styles.attrDivider} />
+              <View style={styles.attrItem}>
+                <Text style={styles.attrLabel}>主要目标</Text>
+                <Text style={styles.attrValue}>{plan.primaryGoalLabel}</Text>
+              </View>
+            </View>
+
             <Text style={styles.planDescription}>{plan.description}</Text>
+
+            {/* 核心特点标签 */}
+            <View style={styles.featuresRow}>
+              {plan.coreFeatures.map((feature, idx) => (
+                <View key={idx} style={styles.featureTag}>
+                  <Text style={styles.featureText}>{feature}</Text>
+                </View>
+              ))}
+            </View>
+
             <Pressable
               style={({ pressed }) => [
                 styles.startButton,
                 pressed && styles.startButtonPressed,
               ]}
-              onPress={() => handleStartTraining(plan.id)}
+              onPress={() => handleStartTraining(plan)}
               android_ripple={{ color: "rgba(106, 76, 147, 0.15)" }}
             >
               <Text style={styles.startButtonText}>开始计划</Text>
@@ -124,8 +129,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F7F6FA",
     paddingHorizontal: 20,
   },
-
-  // 顶部标题区
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -154,17 +157,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#8E8E93",
     lineHeight: 18,
-    fontWeight: "400",
   },
-
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingBottom: 40,
   },
-
-  // 计划卡片
   planCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
@@ -197,35 +196,101 @@ const styles = StyleSheet.create({
     color: "#1C1C1E",
     fontSize: 17,
     fontWeight: "700",
-    marginBottom: 6,
+    marginBottom: 2,
     letterSpacing: -0.2,
   },
-  planMeta: {
+  planSubtitle: {
+    color: "#8E8E93",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  metaRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 12,
+    gap: 10,
   },
   difficultyTag: {
     backgroundColor: "#F3F0FF",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
-    marginRight: 8,
   },
   difficultyText: {
     color: "#6A4C93",
     fontSize: 12,
     fontWeight: "600",
   },
-  planDuration: {
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  metaText: {
     color: "#8E8E93",
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "500",
+  },
+  attrRow: {
+    flexDirection: "row",
+    backgroundColor: "#F7F6FA",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    alignItems: "center",
+  },
+  attrItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  attrLabel: {
+    fontSize: 11,
+    color: "#8E8E93",
+    marginBottom: 3,
+  },
+  attrValue: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1C1C1E",
+  },
+  attrValueRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  fatigueDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  attrDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: "#E5E5EA",
   },
   planDescription: {
     color: "#3C3C43",
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  featuresRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
     marginBottom: 14,
+  },
+  featureTag: {
+    backgroundColor: "#F3F0FF",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  featureText: {
+    color: "#6A4C93",
+    fontSize: 11,
+    fontWeight: "600",
   },
   startButton: {
     backgroundColor: "#6A4C93",
