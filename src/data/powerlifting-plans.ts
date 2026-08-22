@@ -36,7 +36,7 @@ export const POWERLIFTING_PLANS: PowerliftingPlan[] = [
     title: "Wendler 5-3-1",
     subtitle: "Wendler 5/3/1",
     description:
-      "Jim Wendler 创建的经典周期化力量计划，基于 Training Max（通常为真实1RM的90%）固定百分比推进，4周一个循环含减载周，注重长期可持续的力量积累。后续版本逐渐加入更多自主调节(autoregulation)。",
+      "Jim Wendler 创建的经典周期化力量计划，基于 Training Max（通常为真实1RM的90%）固定百分比推进，4周一个循环含减载周，注重长期可持续的力量积累。后续版本逐渐加入更多根据状态自主调节的机制。",
     icon: "calendar-outline",
     creator: "Jim Wendler",
     experienceLevel: {
@@ -105,7 +105,7 @@ export const POWERLIFTING_PLANS: PowerliftingPlan[] = [
     title: "GZCLP",
     subtitle: "Phrak's GreySkull LP",
     description:
-      "Phrak（John Sheaffer）在 GreySkull LP 体系基础上发布的新手线性进阶计划，采用 T1/T2/T3 三级动作分级和 A/B/A 周内轮换。在 Reddit r/Fitness 社区被作为新手计划广泛推荐，程序复杂度高于 Starting Strength 但仍属典型新手线性计划，适合健身新手建立力量基础。",
+      "Phrak（John Sheaffer）在 GreySkull LP 体系基础上发布的新手线性进阶计划，采用 T1/T2/T3 三级动作分级和 A/B 日交替轮换。在 Reddit r/Fitness 社区被作为新手计划广泛推荐，程序复杂度高于 Starting Strength 但仍属典型新手线性计划，适合健身新手建立力量基础。",
     icon: "stats-chart-outline",
     creator: "Phrak (John Sheaffer)",
     creatorNote: "基于 GreySkull LP 体系；Cody Lefever 为 GZCL 方法论推广者及 nSuns 创建者，非本模板作者",
@@ -121,7 +121,7 @@ export const POWERLIFTING_PLANS: PowerliftingPlan[] = [
     fatigueManagement: "low",
     fatigueManagementLabel: "较低",
     duration: "持续进阶",
-    coreFeatures: ["T1/T2/T3三级分级", "A/B/A轮换", "新手线性进阶"],
+    coreFeatures: ["T1/T2/T3三级分级", "A/B日交替轮换", "新手线性进阶"],
     route: "/powerlifting-plans/gzclp",
   },
   {
@@ -129,7 +129,7 @@ export const POWERLIFTING_PLANS: PowerliftingPlan[] = [
     title: "疯牛5x5",
     subtitle: "Madcow 5x5",
     description:
-      "基于5x5理念的中级直线力量进阶计划，在 StrongLifts 社区广泛使用。前4组按12.5%递增热身、最后1组为正式组，周五加1×3强度组（+2.5%）和1×8容量组，下周正式组=本周1×3重量，实现跨越式直线进步。适合已具备力量基础、无法从新手线性进阶持续获益的训练者。",
+      "基于5x5理念的中级直线力量进阶计划，在 StrongLifts 社区广泛使用。前4组递增热身、最后1组为正式组，周五加1×3强度组和1×8容量组，下周正式组=本周1×3重量，实现跨越式直线进步。适合已具备力量基础、无法从新手线性进阶持续获益的训练者。",
     icon: "fitness-outline",
     creator: "Madcow (StrongLifts社区)",
     experienceLevel: {
