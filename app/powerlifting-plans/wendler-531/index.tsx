@@ -5,6 +5,33 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
+const WEEKS = [
+  {
+    week: 1,
+    title: "5次组周",
+    focus: "主项3组×5次，逐步建立训练容量",
+    intensity: "65% / 75% / 85% TM",
+  },
+  {
+    week: 2,
+    title: "3次组周",
+    focus: "主项3组×3次，提高训练强度",
+    intensity: "70% / 80% / 90% TM",
+  },
+  {
+    week: 3,
+    title: "1次组周",
+    focus: "主项5/3/1递增，最后一组挑战极限",
+    intensity: "75% / 85% / 95% TM",
+  },
+  {
+    week: 4,
+    title: "减载周",
+    focus: "降低训练量，充分恢复，为下一循环蓄力",
+    intensity: "40% / 50% / 60% TM",
+  },
+];
+
 export default function Wendler531Page() {
   const router = useRouter();
   const navigation = useNavigation();
@@ -12,17 +39,6 @@ export default function Wendler531Page() {
   useLayoutEffect(() => {
     navigation.setOptions({ title: "Wendler 5-3-1" });
   }, [navigation]);
-
-  const actions = [
-    {
-      id: "start",
-      title: "开始设置参数",
-      subtitle: "输入你的 1RM，生成个性化训练计划",
-      icon: "create-outline",
-      color: "#6A4C93",
-      onPress: () => router.push(`/powerlifting-plans/wendler-531/wendler-input`),
-    },
-  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -42,6 +58,38 @@ export default function Wendler531Page() {
             <Text style={styles.headerSubtitle}>经典周期化训练，4 周循环，长期可持续进步</Text>
           </View>
         </View>
+
+        {/* 统计卡片 */}
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>4</Text>
+            <Text style={styles.statLabel}>周循环</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>4</Text>
+            <Text style={styles.statLabel}>天/周</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>4</Text>
+            <Text style={styles.statLabel}>核心动作</Text>
+          </View>
+        </View>
+
+        {/* 开始训练计划按钮 */}
+        <Pressable
+          style={({ pressed }) => [styles.startButton, pressed && styles.startButtonPressed]}
+          onPress={() => router.push(`/powerlifting-plans/wendler-531/wendler-input`)}
+          android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+        >
+          <View style={styles.startIcon}>
+            <Ionicons name="play-circle" size={28} color="#FFFFFF" />
+          </View>
+          <View style={styles.startContent}>
+            <Text style={styles.startTitle}>开始训练计划</Text>
+            <Text style={styles.startSubtitle}>输入四项 1RM，自动生成 4 周训练重量</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+        </Pressable>
 
         {/* 计划说明卡片 */}
         <View style={styles.introCard}>
@@ -64,26 +112,21 @@ export default function Wendler531Page() {
           </View>
         </View>
 
-        {/* 操作卡片列表 */}
-        {actions.map((action) => (
-          <Pressable
-            key={action.id}
-            style={({ pressed }) => [
-              styles.actionCard,
-              pressed && styles.actionCardPressed,
-            ]}
-            onPress={action.onPress}
-            android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
-          >
-            <View style={styles.actionIcon}>
-              <Ionicons name={action.icon as any} size={22} color="#6A4C93" />
+        {/* 4周计划概览 */}
+        <Text style={styles.sectionTitle}>4周计划概览</Text>
+        {WEEKS.map((week) => (
+          <View key={week.week} style={styles.weekCard}>
+            <View style={styles.weekBadge}>
+              <Text style={styles.weekBadgeText}>第{week.week}周</Text>
             </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>{action.title}</Text>
-              <Text style={styles.actionSubtitle}>{action.subtitle}</Text>
+            <View style={styles.weekContent}>
+              <View style={styles.weekTitleRow}>
+                <Text style={styles.weekTitle}>{week.title}</Text>
+                <Text style={styles.weekIntensity}>{week.intensity}</Text>
+              </View>
+              <Text style={styles.weekFocus}>{week.focus}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#C7C7CC" />
-          </Pressable>
+          </View>
         ))}
       </ScrollView>
     </SafeAreaView>
@@ -132,15 +175,86 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#8E8E93",
     lineHeight: 18,
-    fontWeight: "400",
   },
 
-  // 计划简介卡片
+  // 统计卡片
+  statsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 14,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  statValue: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#6A4C93",
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#8E8E93",
+    fontWeight: "500",
+  },
+
+  // 开始按钮
+  startButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#6A4C93",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+    gap: 14,
+    shadowColor: "#6A4C93",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  startButtonPressed: {
+    backgroundColor: "#5A3D80",
+    transform: [{ scale: 0.99 }],
+  },
+  startIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  startContent: {
+    flex: 1,
+  },
+  startTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 3,
+  },
+  startSubtitle: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.8)",
+    lineHeight: 17,
+  },
+
+  // 计划说明卡片
   introCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 18,
-    marginBottom: 12,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -159,9 +273,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     gap: 8,
   },
-  introRowLast: {
-    marginBottom: 0,
-  },
   introText: {
     flex: 1,
     fontSize: 13,
@@ -169,45 +280,63 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // 操作卡片
-  actionCard: {
+  // 周计划概览
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1C1C1E",
+    marginBottom: 10,
+    marginTop: 4,
+  },
+  weekCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 10,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
     elevation: 2,
-    gap: 14,
+    gap: 12,
   },
-  actionCardPressed: {
-    backgroundColor: "#FAFAFC",
-    transform: [{ scale: 0.99 }],
-  },
-  actionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+  weekBadge: {
     backgroundColor: "#F3F0FF",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    minWidth: 52,
     alignItems: "center",
-    justifyContent: "center",
   },
-  actionContent: {
+  weekBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#6A4C93",
+  },
+  weekContent: {
     flex: 1,
   },
-  actionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1C1C1E",
-    marginBottom: 3,
+  weekTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
   },
-  actionSubtitle: {
-    fontSize: 13,
+  weekTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1C1C1E",
+  },
+  weekFocus: {
+    fontSize: 12,
     color: "#8E8E93",
-    lineHeight: 17,
+    lineHeight: 16,
+  },
+  weekIntensity: {
+    fontSize: 11,
+    color: "#6A4C93",
+    fontWeight: "600",
   },
 });
