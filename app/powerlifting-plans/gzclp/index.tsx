@@ -1,46 +1,22 @@
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import { useLayoutEffect } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { GZCLP_PROGRAM } from "../../../src/data/gzclp-data";
 
 export default function GZCLPIndex() {
   const router = useRouter();
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: "GZCLP" });
+    navigation.setOptions({ title: "GZCLP 直线计划" });
   }, [navigation]);
-
-  const weeks = [
-    { number: 1, description: "基础适应周" },
-    { number: 2, description: "强度提升周" },
-    { number: 3, description: "容量增加周" },
-    { number: 4, description: "峰值周" },
-  ];
-
-  const dayInfo: Record<number, { label: string; moves: string }> = {
-    1: { label: "A", moves: "深蹲 · 卧推 · 划船" },
-    2: { label: "B", moves: "深蹲 · 硬拉 · 推举" },
-    3: { label: "A+", moves: "深蹲 · 卧推 · 划船" },
-  };
-
-  const handleDayPress = (weekNumber: number, dayNumber: number) => {
-    router.push({
-      pathname: `/powerlifting-plans/gzclp/[week]/[day]`,
-      params: {
-        week: weekNumber.toString(),
-        day: `day${dayNumber}`,
-      },
-    });
-  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ title: "GZCLP" }} />
       <ScrollView
-        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -50,92 +26,106 @@ export default function GZCLPIndex() {
             <Ionicons name="stats-chart-outline" size={24} color="#6A4C93" />
           </View>
           <View style={styles.headerText}>
-            <Text style={styles.headerTitle}>GZCLP</Text>
-            <Text style={styles.headerSubtitle}>系统化渐进超负荷，适合自学者的 12 周计划</Text>
+            <Text style={styles.headerTitle}>GZCLP 直线计划</Text>
+            <Text style={styles.headerSubtitle}>
+              T1 线性进阶 + T2 固定容量，系统化渐进超负荷训练
+            </Text>
           </View>
         </View>
 
-        {/* 计划数据统计卡片 */}
+        {/* 数据统计卡片 */}
         <View style={styles.statsCard}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>12</Text>
-            <Text style={styles.statLabel}>周数</Text>
+            <Text style={styles.statLabel}>周计划</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>3</Text>
+            <Text style={styles.statNumber}>4</Text>
             <Text style={styles.statLabel}>训练日/周</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>3</Text>
-            <Text style={styles.statLabel}>主要动作</Text>
+            <Text style={styles.statLabel}>动作级别</Text>
           </View>
         </View>
 
-        {/* 计算器入口 */}
+        {/* 开始按钮 */}
         <Pressable
           style={({ pressed }) => [
-            styles.calculatorCard,
-            pressed && styles.calculatorCardPressed,
+            styles.startCard,
+            pressed && styles.startCardPressed,
           ]}
-          onPress={() => router.push("/powerlifting-plans/gzclp/calculator")}
-          android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
+          onPress={() => router.push("/powerlifting-plans/gzclp/gzclp-input")}
         >
-          <View style={styles.calculatorIcon}>
-            <Ionicons name="calculator-outline" size={22} color="#6A4C93" />
+          <View style={styles.startIcon}>
+            <Ionicons name="play-circle-outline" size={28} color="#FFFFFF" />
           </View>
-          <View style={styles.calculatorContent}>
-            <Text style={styles.calculatorTitle}>训练重量计算器</Text>
-            <Text style={styles.calculatorSubtitle}>输入 1RM，自动计算各周训练重量</Text>
+          <View style={styles.startContent}>
+            <Text style={styles.startTitle}>开始训练计划</Text>
+            <Text style={styles.startSubtitle}>
+              输入四项 5RM，自动计算 T1/T2 重量并生成 12 周计划
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color="#C7C7CC" />
+          <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
         </Pressable>
 
-        {/* 周计划列表 */}
-        <Text style={styles.sectionTitle}>训练周计划</Text>
-        {weeks.map((week) => (
-          <View key={week.number} style={styles.weekCard}>
-            <View style={styles.weekHeader}>
-              <View style={styles.weekBadge}>
-                <Text style={styles.weekBadgeText}>WEEK {week.number}</Text>
-              </View>
-              <Text style={styles.weekDescription}>{week.description}</Text>
-            </View>
+        {/* 计划说明卡片 */}
+        <View style={styles.infoCard}>
+          <View style={styles.infoHeader}>
+            <Ionicons name="information-circle-outline" size={18} color="#6A4C93" />
+            <Text style={styles.infoTitle}>计划说明</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoBullet}>T1</Text>
+            <Text style={styles.infoText}>
+              主项动作，3×5+（最后一组尽力多做），起始重量 = 5RM×85%，每周递增 2.5kg
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoBullet}>T2</Text>
+            <Text style={styles.infoText}>
+              辅助动作，10×3，固定重量 = 5RM×65%，全程不变
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoBullet}>T3</Text>
+            <Text style={styles.infoText}>
+              自选辅助动作（俯身划船/引体向上），自选重量和次数
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoBullet}>Reset</Text>
+            <Text style={styles.infoText}>
+              第 8 周起如无法完成 T1，降低 10-15% 重量重新线性进阶
+            </Text>
+          </View>
+        </View>
 
-            <View style={styles.daysContainer}>
-              {[1, 2, 3].map((day) => {
-                const info = dayInfo[day];
-                return (
-                  <Pressable
-                    key={day}
-                    style={({ pressed }) => [
-                      styles.dayButton,
-                      pressed && styles.dayButtonPressed,
-                    ]}
-                    onPress={() => handleDayPress(week.number, day)}
-                    android_ripple={{ color: "rgba(106, 76, 147, 0.08)" }}
-                  >
-                    <View style={styles.dayIcon}>
-                      <Text style={styles.dayIconText}>{info.label}</Text>
-                    </View>
-                    <View style={styles.dayContent}>
-                      <Text style={styles.dayTitle}>Day {day}</Text>
-                      <Text style={styles.daySubtitle}>{info.moves}</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={16} color="#C7C7CC" />
-                  </Pressable>
-                );
-              })}
+        {/* 12周概览 */}
+        <Text style={styles.sectionTitle}>12 周计划概览</Text>
+        {GZCLP_PROGRAM.map((week) => (
+          <View key={week.id} style={styles.weekCard}>
+            <View style={styles.weekBadge}>
+              <Text style={styles.weekBadgeText}>WEEK {week.weekNumber}</Text>
             </View>
+            <View style={styles.weekContent}>
+              <Text style={styles.weekTitle}>
+                {week.title.replace(/^第\d+周[：:]/, "")}
+              </Text>
+              <Text style={styles.weekDesc}>{week.description}</Text>
+            </View>
+            {week.isResetWeek && (
+              <View style={styles.resetTag}>
+                <Ionicons name="refresh-outline" size={12} color="#FF9500" />
+                <Text style={styles.resetTagText}>可Reset</Text>
+              </View>
+            )}
           </View>
         ))}
 
-        {/* 底部提示 */}
-        <View style={styles.footer}>
-          <Ionicons name="bulb-outline" size={14} color="#8E8E93" />
-          <Text style={styles.footerText}>点击任意训练日开始你的训练</Text>
-        </View>
+        <View style={{ height: 20 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -146,15 +136,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7F6FA",
   },
-  scrollView: {
-    flex: 1,
-  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-
-  // 顶部标题区
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -183,10 +168,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#8E8E93",
     lineHeight: 18,
-    fontWeight: "400",
   },
-
-  // 数据统计卡片
   statsCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -220,79 +202,112 @@ const styles = StyleSheet.create({
     height: 36,
     backgroundColor: "#EDEDF0",
   },
-
-  // 计算器卡片
-  calculatorCard: {
+  startCard: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#6A4C93",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 20,
+    gap: 14,
+    shadowColor: "#6A4C93",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  startCardPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.99 }],
+  },
+  startIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  startContent: {
+    flex: 1,
+  },
+  startTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 2,
+  },
+  startSubtitle: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.8)",
+    lineHeight: 16,
+  },
+  infoCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 16,
+    padding: 18,
     marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
-    gap: 14,
   },
-  calculatorCardPressed: {
-    backgroundColor: "#FAFAFC",
-    transform: [{ scale: 0.99 }],
-  },
-  calculatorIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "#F3F0FF",
+  infoHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    marginBottom: 12,
+    gap: 8,
   },
-  calculatorContent: {
-    flex: 1,
-  },
-  calculatorTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+  infoTitle: {
+    fontSize: 15,
+    fontWeight: "700",
     color: "#1C1C1E",
-    marginBottom: 3,
   },
-  calculatorSubtitle: {
+  infoRow: {
+    flexDirection: "row",
+    marginBottom: 10,
+    gap: 10,
+  },
+  infoBullet: {
     fontSize: 13,
-    color: "#8E8E93",
-    lineHeight: 17,
+    fontWeight: "700",
+    color: "#6A4C93",
+    minWidth: 36,
   },
-
-  // 分区标题
+  infoText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#3C3C43",
+    lineHeight: 18,
+  },
   sectionTitle: {
     fontSize: 15,
     fontWeight: "700",
     color: "#1C1C1E",
     marginBottom: 12,
   },
-
-  // 周计划卡片
   weekCard: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  weekHeader: {
-    marginBottom: 14,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+    gap: 12,
   },
   weekBadge: {
     backgroundColor: "#F3F0FF",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
-    alignSelf: "flex-start",
-    marginBottom: 8,
+    minWidth: 56,
+    alignItems: "center",
   },
   weekBadgeText: {
     fontSize: 11,
@@ -300,65 +315,32 @@ const styles = StyleSheet.create({
     color: "#6A4C93",
     letterSpacing: 0.5,
   },
-  weekDescription: {
-    fontSize: 14,
-    color: "#3C3C43",
-    fontWeight: "500",
-  },
-
-  // 训练日列表
-  daysContainer: {
-    gap: 8,
-  },
-  dayButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F7F6FA",
-    borderRadius: 12,
-    padding: 12,
-    gap: 12,
-  },
-  dayButtonPressed: {
-    backgroundColor: "#F0EDFA",
-  },
-  dayIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#6A4C93",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  dayIconText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  dayContent: {
+  weekContent: {
     flex: 1,
   },
-  dayTitle: {
-    fontSize: 15,
+  weekTitle: {
+    fontSize: 14,
     fontWeight: "600",
     color: "#1C1C1E",
     marginBottom: 2,
   },
-  daySubtitle: {
+  weekDesc: {
     fontSize: 12,
     color: "#8E8E93",
+    lineHeight: 16,
   },
-
-  // 底部提示
-  footer: {
+  resetTag: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 20,
-    gap: 6,
+    backgroundColor: "#FFF4E5",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 4,
   },
-  footerText: {
-    color: "#8E8E93",
-    fontSize: 13,
-    textAlign: "center",
+  resetTagText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#FF9500",
   },
 });
