@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { View } from "react-native";
 
 export default function Layout() {
   return (
@@ -8,7 +9,6 @@ export default function Layout() {
         headerShown: false,
         tabBarActiveTintColor: "#6A4C93",
         tabBarInactiveTintColor: "#999",
-        tabBarActiveBackgroundColor: "#F3F0FF",
         tabBarStyle: {
           backgroundColor: "#fff",
           borderTopWidth: 0,
@@ -19,11 +19,11 @@ export default function Layout() {
           shadowRadius: 4,
         },
         tabBarItemStyle: {
-          paddingVertical: 6,
+          paddingVertical: 4,
+          paddingTop: 8,
         },
         tabBarIcon: ({ color, size, focused }) => {
           let iconName;
-          const iconSize = focused ? size + 2 : size;
 
           switch (route.name) {
             case "training":
@@ -42,17 +42,24 @@ export default function Layout() {
               iconName = focused ? "ellipse" : "ellipse-outline";
           }
 
-          return (
-            <Ionicons
-              name={iconName}
-              size={iconSize}
-              color={color}
-              style={{
-                transform: [{ scale: focused ? 1.15 : 1 }], // 轻微放大效果
-                transition: "all 0.2s ease", // 平滑过渡
-              }}
-            />
-          );
+          if (focused) {
+            return (
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#6A4C93",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Ionicons name={iconName} size={18} color="#FFFFFF" />
+              </View>
+            );
+          }
+
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
     >
