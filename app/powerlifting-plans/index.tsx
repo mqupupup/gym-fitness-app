@@ -4,7 +4,10 @@ import { useRouter } from "expo-router";
 import { useLayoutEffect } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { POWERLIFTING_PLANS, PowerliftingPlan as PlanData } from "../../src/data/powerlifting-plans";
+import {
+  POWERLIFTING_PLANS,
+  PowerliftingPlan as PlanData,
+} from "../../src/data/powerlifting-plans";
 
 const FATIGUE_COLORS: Record<string, string> = {
   low: "#34C759",
@@ -17,7 +20,7 @@ export default function PowerliftingPlan() {
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: "力量举计划" });
+    navigation.setOptions({ title: "力量举训练计划" });
   }, [navigation]);
 
   const handleStartTraining = (plan: PlanData) => {
@@ -31,7 +34,7 @@ export default function PowerliftingPlan() {
           <Ionicons name="trophy-outline" size={24} color="#6A4C93" />
         </View>
         <View style={styles.headerText}>
-          <Text style={styles.headerTitle}>力量举计划</Text>
+          <Text style={styles.headerTitle}>力量举训练计划</Text>
           <Text style={styles.headerSubtitle}>选择适合你的权威训练计划</Text>
         </View>
       </View>
@@ -56,7 +59,9 @@ export default function PowerliftingPlan() {
             {/* 元信息标签行 */}
             <View style={styles.metaRow}>
               <View style={styles.difficultyTag}>
-                <Text style={styles.difficultyText}>{plan.experienceLevel.typical}</Text>
+                <Text style={styles.difficultyText}>
+                  {plan.experienceLevel.typical}
+                </Text>
               </View>
               <View style={styles.metaItem}>
                 <Ionicons name="calendar-outline" size={12} color="#8E8E93" />
@@ -72,7 +77,9 @@ export default function PowerliftingPlan() {
             <View style={styles.attrRow}>
               <View style={styles.attrItem}>
                 <Text style={styles.attrLabel}>周期结构</Text>
-                <Text style={styles.attrValue}>{plan.progressionTypeLabel}</Text>
+                <Text style={styles.attrValue}>
+                  {plan.progressionTypeLabel}
+                </Text>
               </View>
               <View style={styles.attrDivider} />
               <View style={styles.attrItem}>
@@ -81,10 +88,14 @@ export default function PowerliftingPlan() {
                   <View
                     style={[
                       styles.fatigueDot,
-                      { backgroundColor: FATIGUE_COLORS[plan.fatigueManagement] },
+                      {
+                        backgroundColor: FATIGUE_COLORS[plan.fatigueManagement],
+                      },
                     ]}
                   />
-                  <Text style={styles.attrValue}>{plan.fatigueManagementLabel}</Text>
+                  <Text style={styles.attrValue}>
+                    {plan.fatigueManagementLabel}
+                  </Text>
                 </View>
               </View>
               <View style={styles.attrDivider} />

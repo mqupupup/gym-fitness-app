@@ -8,28 +8,28 @@ import {
 
 const items = [
   {
-    title: "力量水平评估",
-    subtitle: "查看你的力量等级与发展潜力",
+    title: "综合力量评估",
+    subtitle: "多维度力量水平分析与等级评定",
     icon: "barbell-outline",
     route: "/strength-evaluation",
   },
   {
-    title: "减肥 & 减脂",
-    subtitle: "热量计算 + 饮食训练策略，科学减脂",
-    icon: "flame-outline",
-    route: "/weight-loss",
-  },
-  {
-    title: "力量举水平评估",
-    subtitle: "三大项成绩与等级诊断",
+    title: "力量举专项评估",
+    subtitle: "深蹲·卧推·硬拉成绩与等级分析",
     icon: "trophy-outline",
     route: "/powerlifting-evaluation",
   },
   {
-    title: "力量举计划",
+    title: "力量举训练计划",
     subtitle: "周期性训练计划与进度追踪",
     icon: "calendar-outline",
     route: "/powerlifting-plans",
+  },
+  {
+    title: "减脂 & 减重",
+    subtitle: "热量计算 + 饮食训练策略，科学减脂",
+    icon: "flame-outline",
+    route: "/weight-loss",
   },
 ];
 

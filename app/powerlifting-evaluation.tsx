@@ -1,17 +1,17 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useLayoutEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import { CoefficientSelector } from "../src/components/CoefficientSelector";
 import { InputSection } from "../src/components/InputSection";
 import { ResultSection } from "../src/components/ResultSection";
@@ -46,7 +46,7 @@ export default function PowerliftingEvaluation() {
   );
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: "力量举水平评估" });
+    navigation.setOptions({ title: "力量举专项评估" });
   }, [navigation]);
 
   const handleEvaluate = () => {
@@ -72,7 +72,7 @@ export default function PowerliftingEvaluation() {
               <Ionicons name="trophy-outline" size={24} color="#6A4C93" />
             </View>
             <View style={styles.headerText}>
-              <Text style={styles.headerTitle}>力量举评估</Text>
+              <Text style={styles.headerTitle}>力量举专项评估</Text>
               <Text style={styles.headerSubtitle}>
                 输入三大项成绩，获得专业力量举水平分析
               </Text>
