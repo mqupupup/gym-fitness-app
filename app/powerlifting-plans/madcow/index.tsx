@@ -54,19 +54,6 @@ export default function MadcowIndex() {
           </View>
         </View>
 
-        {/* 开始按钮 */}
-        <Pressable
-          style={({ pressed }) => [
-            styles.startButton,
-            pressed && styles.startButtonPressed,
-          ]}
-          onPress={() => router.push("/powerlifting-plans/madcow/madcow-input")}
-          android_ripple={{ color: "rgba(255,255,255,0.15)" }}
-        >
-          <Ionicons name="play-circle-outline" size={22} color="#FFFFFF" />
-          <Text style={styles.startButtonText}>开始设置参数</Text>
-        </Pressable>
-
         {/* 统计卡片 */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
@@ -82,6 +69,22 @@ export default function MadcowIndex() {
             <Text style={styles.statLabel}>核心动作</Text>
           </View>
         </View>
+
+        {/* 开始训练计划按钮 */}
+        <Pressable
+          style={({ pressed }) => [styles.startButton, pressed && styles.startButtonPressed]}
+          onPress={() => router.push("/powerlifting-plans/madcow/madcow-input")}
+          android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+        >
+          <View style={styles.startIcon}>
+            <Ionicons name="play-circle" size={28} color="#FFFFFF" />
+          </View>
+          <View style={styles.startContent}>
+            <Text style={styles.startTitle}>开始训练计划</Text>
+            <Text style={styles.startSubtitle}>输入五项测试重量，自动生成 12 周训练计划</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+        </Pressable>
 
         {/* 计划说明 */}
         <View style={styles.sectionCard}>
@@ -239,27 +242,42 @@ const styles = StyleSheet.create({
   startButton: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     backgroundColor: "#6A4C93",
-    borderRadius: 14,
-    paddingVertical: 16,
+    borderRadius: 16,
+    padding: 16,
     marginBottom: 16,
-    gap: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 3,
+    gap: 14,
+    shadowColor: "#6A4C93",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   startButtonPressed: {
     backgroundColor: "#5A3D80",
-    transform: [{ scale: 0.98 }],
+    transform: [{ scale: 0.99 }],
   },
-  startButtonText: {
+  startIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  startContent: {
+    flex: 1,
+  },
+  startTitle: {
+    fontSize: 17,
+    fontWeight: "700",
     color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-    letterSpacing: 0.3,
+    marginBottom: 3,
+  },
+  startSubtitle: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.8)",
+    lineHeight: 17,
   },
   statsRow: {
     flexDirection: "row",
